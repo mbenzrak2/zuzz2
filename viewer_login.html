@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login - ZUZZ TV</title>
+<link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#ff5722">
+<style>
+:root{--p:#ff5722;--bg:#0d1117;--card:#161b22;--bdr:#30363d;--txt:#f0f6fc;--mut:#8b949e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui;background:var(--bg);color:var(--txt);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.box{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:40px;width:100%;max-width:400px}
+.logo{text-align:center;margin-bottom:30px}
+.logo h1{font-size:32px;background:linear-gradient(135deg,#ff5722,#ff9800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo span{color:var(--mut);font-size:13px}
+.fg{margin-bottom:20px}
+.fg label{display:block;margin-bottom:6px;color:var(--mut);font-size:13px}
+.fg input{width:100%;padding:12px;background:var(--bg);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:14px}
+.fg input:focus{outline:none;border-color:var(--p)}
+.btn{width:100%;padding:14px;background:linear-gradient(135deg,#ff5722,#ff9800);border:none;border-radius:8px;color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+.btn:hover{opacity:.9}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.err{background:rgba(248,81,73,.1);border:1px solid #f85149;color:#f85149;padding:10px;border-radius:6px;margin-bottom:15px;font-size:13px;display:none}
+.err.show{display:block}
+.links{text-align:center;margin-top:20px;font-size:13px}
+.links a{color:var(--p);text-decoration:none}
+.links a:hover{text-decoration:underline}
+.divider{display:flex;align-items:center;margin:20px 0;color:var(--mut);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.divider span{padding:0 15px}
+</style>
+</head>
+<body>
+<div class="box">
+<div class="logo"><h1 id="site-logo">ZUZZ TV</h1><span>Welcome back!</span></div>
+<div class="err" id="err"></div>
+<div class="fg">
+    <label>Email or Username</label>
+    <input type="text" id="login-input" autofocus placeholder="Enter email or username">
+</div>
+<div class="fg">
+    <label>Password</label>
+    <input type="password" id="pass-input" placeholder="Enter password">
+</div>
+<button class="btn" id="login-btn" onclick="doLogin()">🔓 Sign In</button>
+<div class="divider"><span>OR</span></div>
+<div class="links">
+<p style="margin-bottom:10px"><a href="/forgot-password">🔑 Forgot Password?</a></p>
+<p>Don't have an account? <a href="/register">Create one</a></p>
+<br><a href="/">← Back to Home</a>
+</div>
+</div>
+
+<script>
+// Load site name
+fetch('/api/data').then(r=>r.json()).then(d=>{
+    const siteName = d.settings?.site_name || 'ZUZZ TV';
+    document.getElementById('site-logo').textContent = siteName;
+    document.title = 'Login - ' + siteName;
+}).catch(()=>{});
+// Allow Enter key to submit
+document.getElementById('login-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') doLogin();
+});
+document.getElementById('pass-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') doLogin();
+});
+
+async function doLogin() {
+    var errEl = document.getElementById('err');
+    var btn = document.getElementById('login-btn');
+    var loginVal = document.getElementById('login-input').value.trim();
+    var passVal = document.getElementById('pass-input').value;
+    
+    // Hide error
+    errEl.classList.remove('show');
+    
+    // Validate
+    if (!loginVal || !passVal) {
+        errEl.textContent = 'Please enter email/username and password';
+        errEl.classList.add('show');
+        return;
+    }
+    
+    // Disable button
+    btn.disabled = true;
+    btn.textContent = '⏳ Signing in...';
+    
+    try {
+        console.log('Login attempt:', loginVal);
+        
+        var response = await fetch('/api/viewer/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                login: loginVal,
+                password: passVal
+            })
+        });
+        
+        var data = await response.json();
+        console.log('Response:', data);
+        
+        if (data.success) {
+            localStorage.setItem('vt', data.token);
+            localStorage.setItem('vu', data.username);
+            localStorage.setItem('vid', String(data.viewer_id));
+            if (data.subscription) {
+                localStorage.setItem('vsub', JSON.stringify(data.subscription));
+            }
+            window.location.href = '/';
+        } else {
+            errEl.textContent = data.error || 'Login failed';
+            errEl.classList.add('show');
+            btn.disabled = false;
+            btn.textContent = '🔓 Sign In';
+        }
+    } catch (e) {
+        console.error('Error:', e);
+        errEl.textContent = 'Connection error. Please try again.';
+        errEl.classList.add('show');
+        btn.disabled = false;
+        btn.textContent = '🔓 Sign In';
+    }
+}
+
+// Check if already logged in
+(async function() {
+    var token = localStorage.getItem('vt');
+    if (token) {
+        try {
+            var r = await fetch('/api/viewer/profile', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            var d = await r.json();
+            if (d.success) {
+                window.location.href = '/';
+            } else {
+                // Invalid token, clear
+                localStorage.removeItem('vt');
+                localStorage.removeItem('vu');
+                localStorage.removeItem('vid');
+                localStorage.removeItem('vsub');
+            }
+        } catch(e) {
+            localStorage.clear();
+        }
+    }
+})();
+</script>
+</body>
+</html>

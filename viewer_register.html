@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Register - ZUZZ TV</title>
+<link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#ff5722">
+<style>:root{--p:#ff5722;--bg:#0d1117;--card:#161b22;--bdr:#30363d;--txt:#f0f6fc;--mut:#8b949e;--ok:#3fb950}*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui;background:var(--bg);color:var(--txt);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}.box{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:40px;width:100%;max-width:400px}.logo{text-align:center;margin-bottom:30px}.logo h1{font-size:32px;background:linear-gradient(135deg,#ff5722,#ff9800);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.logo span{color:var(--mut);font-size:13px}.fg{margin-bottom:16px}.fg label{display:block;margin-bottom:6px;color:var(--mut);font-size:13px}.fg input{width:100%;padding:12px;background:var(--bg);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:14px}.fg input:focus{outline:none;border-color:var(--p)}.fg small{color:var(--mut);font-size:11px}button{width:100%;padding:14px;background:linear-gradient(135deg,#ff5722,#ff9800);border:none;border-radius:8px;color:#fff;font-size:15px;font-weight:600;cursor:pointer}button:hover{opacity:.9}.err{background:rgba(248,81,73,.1);border:1px solid #f85149;color:#f85149;padding:10px;border-radius:6px;margin-bottom:15px;font-size:13px;display:none}.err.show{display:block}.ok{background:rgba(63,185,80,.1);border:1px solid var(--ok);color:var(--ok);padding:10px;border-radius:6px;margin-bottom:15px;font-size:13px;display:none}.ok.show{display:block}.links{text-align:center;margin-top:20px;font-size:13px}.links a{color:var(--p);text-decoration:none}.links a:hover{text-decoration:underline}.benefits{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:15px;margin-bottom:20px}.benefits h3{font-size:14px;margin-bottom:10px;color:var(--p)}.benefits ul{list-style:none;font-size:12px;color:var(--mut)}.benefits li{padding:4px 0}.benefits li::before{content:'✓ ';color:var(--ok)}</style></head>
+<body>
+<div class="box">
+<div class="logo"><h1 id="site-logo">ZUZZ TV</h1><span>Create your account</span></div>
+<div class="benefits"><h3>🎁 Member Benefits</h3><ul><li>Save your favorite channels</li><li>Watch history</li><li>Premium content access</li><li>Multi-device support</li></ul></div>
+<div class="err" id="err"></div>
+<div class="ok" id="ok"></div>
+<form onsubmit="register(event)">
+<div class="fg"><label>Username</label><input type="text" id="user" required minlength="3" placeholder="Choose a username"><small>At least 3 characters</small></div>
+<div class="fg"><label>Email</label><input type="email" id="email" required placeholder="your@email.com"></div>
+<div class="fg"><label>Password</label><input type="password" id="pass" required minlength="6" placeholder="Create password"><small>At least 6 characters</small></div>
+<div class="fg"><label>Confirm Password</label><input type="password" id="pass2" required placeholder="Confirm password"></div>
+<button type="submit">🚀 Create Account</button>
+</form>
+<div class="links"><p>Already have an account? <a href="/login">Sign in</a></p><br><a href="/">← Back to Home</a></div>
+</div>
+<script>
+// Load site name
+fetch('/api/data').then(r=>r.json()).then(d=>{
+    const siteName = d.settings?.site_name || 'ZUZZ TV';
+    document.getElementById('site-logo').textContent = siteName;
+    document.title = 'Register - ' + siteName;
+}).catch(()=>{});
+
+if(localStorage.getItem('vt'))location.href='/';
+async function register(e){
+    e.preventDefault();
+    const user=document.getElementById('user').value.trim();
+    const email=document.getElementById('email').value.trim().toLowerCase();
+    const pass=document.getElementById('pass').value;
+    const pass2=document.getElementById('pass2').value;
+    
+    document.getElementById('err').classList.remove('show');
+    document.getElementById('ok').classList.remove('show');
+    
+    // Validate passwords match
+    if(pass!==pass2){
+        document.getElementById('err').textContent='❌ Passwords do not match';
+        document.getElementById('err').classList.add('show');
+        return;
+    }
+    
+    // Validate username format
+    if(!/^[a-zA-Z0-9_]+$/.test(user)){
+        document.getElementById('err').textContent='❌ Username can only contain letters, numbers, and underscore';
+        document.getElementById('err').classList.add('show');
+        return;
+    }
+    
+    // Validate email format
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        document.getElementById('err').textContent='❌ Please enter a valid email address';
+        document.getElementById('err').classList.add('show');
+        return;
+    }
+    
+    try{
+        const r=await fetch('/api/viewer/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,email,password:pass})});
+        const d=await r.json();
+        if(d.success){
+            // Save to localStorage
+            localStorage.setItem('vt',d.token);
+            localStorage.setItem('vu',d.username);
+            localStorage.setItem('vid',d.viewer_id);
+            localStorage.setItem('ve',email);
+            
+            // Show success and redirect to welcome page
+            document.getElementById('ok').textContent='✅ Account created! Redirecting...';
+            document.getElementById('ok').classList.add('show');
+            
+            // Redirect to welcome page with user info
+            setTimeout(()=>{
+                location.href='/welcome?user='+encodeURIComponent(d.username)+'&email='+encodeURIComponent(email);
+            },1000);
+        }else{
+            // Show specific error message
+            let errMsg = d.error || 'Registration failed';
+            if(errMsg.includes('Username')){
+                errMsg = '❌ This username is already taken. Please choose another.';
+            }else if(errMsg.includes('Email')){
+                errMsg = '❌ This email is already registered. Try logging in instead.';
+            }
+            document.getElementById('err').textContent=errMsg;
+            document.getElementById('err').classList.add('show');
+        }
+    }catch(err){
+        document.getElementById('err').textContent='❌ Connection error. Please try again.';
+        document.getElementById('err').classList.add('show');
+    }
+}
+</script>
+</body></html>

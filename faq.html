@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FAQ - ZUZZ TV</title>
+<link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#ff5722">
+<style>
+:root{--p:#ff5722;--bg:#0d1117;--card:#161b22;--bdr:#30363d;--txt:#f0f6fc;--mut:#8b949e;--hov:#1c2128}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui;background:var(--bg);color:var(--txt);min-height:100vh}
+.header{display:flex;justify-content:space-between;align-items:center;padding:15px 30px;border-bottom:1px solid var(--bdr)}
+.logo{font-size:24px;font-weight:800;background:linear-gradient(135deg,#ff5722,#ff9800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.nav{display:flex;gap:20px}
+.nav a{color:var(--mut);text-decoration:none;font-size:14px}
+.nav a:hover{color:var(--p)}
+.container{max-width:900px;margin:0 auto;padding:40px 20px}
+.footer{border-top:1px solid var(--bdr);padding:30px;text-align:center;color:var(--mut);font-size:13px;margin-top:50px}
+.footer a{color:var(--p);text-decoration:none;margin:0 10px}
+
+.faq-header{text-align:center;margin-bottom:50px}
+.page-title{font-size:36px;font-weight:700;margin-bottom:15px}
+.page-subtitle{color:var(--mut);font-size:16px}
+.faq-item{background:var(--card);border:1px solid var(--bdr);border-radius:12px;margin-bottom:12px;overflow:hidden;transition:all .3s}
+.faq-item:hover{border-color:var(--p)}
+.faq-item.open{border-color:var(--p);box-shadow:0 5px 20px rgba(255,87,34,.15)}
+.faq-q{padding:20px 25px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:15px;transition:all .2s}
+.faq-q:hover{background:var(--hov)}
+.faq-icon{width:24px;height:24px;background:var(--p);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;transition:transform .3s}
+.faq-item.open .faq-icon{transform:rotate(45deg)}
+.faq-a{padding:0 25px 0 64px;max-height:0;overflow:hidden;transition:all .3s ease;color:var(--mut);line-height:1.8}
+.faq-item.open .faq-a{padding:0 25px 25px 64px;max-height:500px}
+.cta-box{text-align:center;margin-top:50px;padding:40px;background:var(--card);border-radius:15px;border:1px solid var(--bdr)}
+.cta-box h3{margin-bottom:15px;color:var(--p)}
+.cta-box p{color:var(--mut);margin-bottom:20px}
+.cta-btn{display:inline-block;background:linear-gradient(135deg,#ff5722,#ff9800);color:#fff;padding:14px 35px;border-radius:10px;text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+<div class="header">
+    <a href="/" class="logo">ZUZZ TV</a>
+    <nav class="nav">
+        <a href="/">Home</a>
+        <a href="/why-zuzz">Why Zuzz?</a>
+        <a href="/login">Login</a>
+    </nav>
+</div>
+
+<div class="container">
+<div class="faq-header">
+    <h1 class="page-title">Frequently Asked Questions</h1>
+    <p class="page-subtitle">Got questions? We've got answers. Click on any question to expand.</p>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>What is Zuzz.tv?</div>
+    <div class="faq-a">Zuzz.tv is a premium sports streaming platform that offers live access to all major sports including NFL, NBA, MLB, NHL, UFC, Soccer, Tennis, and more. We provide HD quality streams without blackout restrictions, so you never miss a game.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>Which countries is your service available to?</div>
+    <div class="faq-a">Our service is available worldwide! Whether you're in the USA, Europe, Asia, or anywhere else, you can access Zuzz.tv with any internet connection. No geo-restrictions.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>Is there a dedicated app for your service?</div>
+    <div class="faq-a">Yes! We have a Progressive Web App (PWA) that works on iOS, Android, and all smart devices. Simply visit our website on your phone and add it to your home screen for an app-like experience.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>Do you offer returns or refunds?</div>
+    <div class="faq-a">Absolutely! We offer a 7-day money-back guarantee. If you're not completely satisfied with our service, contact support within 7 days for a full refund, no questions asked.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>What type of support can I expect?</div>
+    <div class="faq-a">We offer 24/7 customer support via email and live chat. Our dedicated team typically responds within minutes and is always ready to help with any issues.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>Do you have blackout restrictions?</div>
+    <div class="faq-a">NO! Unlike cable TV and official league passes, we have ZERO blackout restrictions. Watch any game, any team, from anywhere in the world.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>What sports do you offer?</div>
+    <div class="faq-a">We cover all major sports: NFL, NBA, MLB, NHL, NCAA Football & Basketball, UFC/MMA, Boxing, Soccer (EPL, La Liga, Serie A, Bundesliga, Champions League), Tennis, Golf, F1, and much more!</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>What are the acceptable payment methods?</div>
+    <div class="faq-a">We accept all major credit cards (Visa, Mastercard, Amex), PayPal, and various other payment methods. All transactions are secure and encrypted.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>Which browsers do you recommend?</div>
+    <div class="faq-a">For the best experience, we recommend Chrome, Firefox, Safari, or Edge. Our player is optimized for all modern browsers and works great on both desktop and mobile.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>Do you have auto-billing?</div>
+    <div class="faq-a">No, our subscriptions do NOT auto-renew. You're in complete control - when your subscription ends, you simply renew if you want to continue.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>Can I cancel anytime?</div>
+    <div class="faq-a">Since we don't have auto-billing, there's nothing to cancel! Your subscription simply expires at the end of your chosen period.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>How many devices are allowed at the same time?</div>
+    <div class="faq-a">Depending on your plan: 2-Day and Weekly passes allow 1 device, Monthly allows 2 devices, and Annual allows up to 3 devices streaming simultaneously.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>Do you have DVR service?</div>
+    <div class="faq-a">Currently, we don't offer DVR. However, most events have replays available within 24 hours after the live broadcast ends.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>How can you offer subscriptions at such a low price?</div>
+    <div class="faq-a">We use efficient streaming technology, have minimal overhead, and believe sports should be accessible to everyone. We cut out the middlemen to bring you the best value.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>Is Zuzz.tv legal?</div>
+    <div class="faq-a">We operate as a streaming platform providing access to sports content. Users are responsible for complying with their local laws regarding streaming services.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>Are Pay-Per-View (PPV) events included?</div>
+    <div class="faq-a">YES! All PPV events including UFC fights, Boxing matches, and wrestling events are included in your subscription at no extra cost.</div>
+</div>
+
+<div class="faq-item">
+    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span class="faq-icon">+</span>Is Zuzz.tv blocked in my country?</div>
+    <div class="faq-a">Zuzz.tv works in most countries. If you experience any access issues, try using a VPN or contact our support team for assistance.</div>
+</div>
+
+<div class="cta-box">
+    <h3>Still have questions?</h3>
+    <p>Our support team is available 24/7 to help you.</p>
+    <a href="/contact" class="cta-btn">Contact Support →</a>
+</div>
+</div>
+
+<div class="footer">
+    <p>© 2025 ZUZZ TV. All rights reserved.</p>
+    <p><a href="/terms">Terms</a> <a href="/privacy">Privacy</a> <a href="/contact">Contact</a></p>
+</div>
+</body>
+</html>

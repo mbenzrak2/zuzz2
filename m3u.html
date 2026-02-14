@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>M3U Import</title>
+<style>:root{--p:#ff5722;--bg:#0d1117;--card:#161b22;--hov:#21262d;--bdr:#30363d;--txt:#f0f6fc;--mut:#8b949e;--ok:#3fb950;--err:#f85149}*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui;background:var(--bg);color:var(--txt);min-height:100vh;display:flex}.side{width:240px;background:var(--card);border-right:1px solid var(--bdr);padding:20px 0;position:fixed;height:100vh}.logo{padding:0 20px 25px;border-bottom:1px solid var(--bdr);margin-bottom:15px}.logo h1{font-size:20px;background:linear-gradient(135deg,#ff5722,#ff9800);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.logo span{font-size:11px;color:var(--mut)}.nav{list-style:none}.ni{padding:12px 20px;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--mut);border-left:3px solid transparent;font-size:14px}.ni:hover{background:var(--hov);color:var(--txt)}.ni.active{background:rgba(255,87,34,.1);color:var(--p);border-left-color:var(--p)}.div{height:1px;background:var(--bdr);margin:12px 20px}.ni.out{color:var(--err)}.main{flex:1;margin-left:240px;padding:25px}.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}.hdr h1{font-size:24px}.btn{padding:10px 20px;border-radius:6px;font-weight:600;cursor:pointer;border:none;font-size:13px}.bp{background:linear-gradient(135deg,#ff5722,#ff9800);color:#fff}.bs{background:var(--hov);color:var(--txt);border:1px solid var(--bdr)}.bd{background:var(--err);color:#fff}.card{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:20px;margin-bottom:20px}.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;padding-bottom:12px;border-bottom:1px solid var(--bdr)}.ct{font-size:16px;font-weight:600}.row{display:flex;gap:10px;margin-bottom:15px}.row input{flex:1;padding:12px;background:var(--bg);border:1px solid var(--bdr);border-radius:6px;color:var(--txt);font-size:14px}.row input:focus{outline:none;border-color:var(--p)}.tbl{width:100%;border-collapse:collapse}.tbl th,.tbl td{padding:12px;text-align:left;border-bottom:1px solid var(--bdr)}.tbl th{color:var(--mut);font-weight:500;font-size:12px;text-transform:uppercase}.tbl tr:hover td{background:var(--hov)}.acts{display:flex;gap:6px}.bsm{padding:6px 12px;font-size:12px}.toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;background:var(--card);border:1px solid var(--bdr);border-radius:8px;display:none;z-index:2000}.toast.show{display:block}.toast.success{border-color:var(--ok)}.toast.error{border-color:var(--err)}.loading{display:none;align-items:center;gap:10px;padding:15px;background:var(--hov);border-radius:8px;margin-bottom:15px}.loading.show{display:flex}.spin{width:20px;height:20px;border:2px solid var(--bdr);border-top-color:var(--p);border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.empty{text-align:center;padding:40px;color:var(--mut)}.empty-ic{font-size:48px;margin-bottom:15px}</style></head>
+<body>
+<aside class="side"><div class="logo"><h1>ZUZZ TV</h1><span>M3U Import</span></div>
+<ul class="nav">
+<li class="ni" onclick="location.href='/admin/dashboard'">📊 Dashboard</li>
+<div class="div"></div>
+<li class="ni active">📥 M3U Import</li>
+<div class="div"></div>
+<li class="ni out" onclick="logout()">🚪 Logout</li>
+</ul></aside>
+<main class="main">
+<div class="hdr"><h1>📥 M3U Import</h1></div>
+<div class="card">
+<div class="ch"><span class="ct">Import New M3U List</span></div>
+<div class="row"><input type="text" id="n" placeholder="List name (e.g. My IPTV)"><input type="text" id="u" placeholder="M3U URL (http://...)"></div>
+<div class="loading" id="ld"><div class="spin"></div><span>Downloading and parsing M3U...</span></div>
+<button class="btn bp" onclick="imp()">📥 Import M3U</button>
+</div>
+<div class="card">
+<div class="ch"><span class="ct">📋 My M3U Lists</span></div>
+<div id="lst"></div>
+</div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+const T=localStorage.getItem('zt');if(!T)location.href='/admin';
+async function load(){
+const r=await fetch('/api/m3u/lists');const d=await r.json();
+const c=document.getElementById('lst');
+if(!d.lists||d.lists.length===0){c.innerHTML='<div class="empty"><div class="empty-ic">📭</div><p>No M3U lists. Import one above!</p></div>';return;}
+c.innerHTML='<table class="tbl"><thead><tr><th>Name</th><th>Channels</th><th>Created</th><th>Actions</th></tr></thead><tbody>'+d.lists.map(l=>`<tr><td><b>${l.name}</b></td><td>${l.channels_count.toLocaleString()}</td><td>${l.created}</td><td class="acts"><a href="/admin/m3u/${l.id}" class="btn bsm bp">▶️ Open</a><button class="btn bsm bs" onclick="refresh(${l.id})">🔄</button><button class="btn bsm bd" onclick="del(${l.id})">🗑️</button></td></tr>`).join('')+'</tbody></table>';
+}
+async function imp(){
+const name=document.getElementById('n').value||'My List';
+const url=document.getElementById('u').value;
+if(!url){toast('Enter M3U URL','error');return;}
+document.getElementById('ld').classList.add('show');
+try{
+const r=await fetch('/api/m3u/import',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify({name,url})});
+const d=await r.json();
+document.getElementById('ld').classList.remove('show');
+if(d.success){toast(`✅ Imported ${d.channels_count.toLocaleString()} channels!`);document.getElementById('n').value='';document.getElementById('u').value='';load();}
+else toast(d.error||'Failed','error');
+}catch(e){document.getElementById('ld').classList.remove('show');toast('Error: '+e.message,'error');}
+}
+async function refresh(id){
+toast('Refreshing...');
+const r=await fetch('/api/m3u/refresh',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify({id})});
+const d=await r.json();
+if(d.success){toast(`✅ Updated: ${d.channels_count.toLocaleString()} channels`);load();}
+else toast(d.error||'Failed','error');
+}
+async function del(id){
+if(!confirm('Delete this list?'))return;
+await fetch('/api/m3u/delete',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify({id})});
+toast('Deleted!');load();
+}
+function logout(){localStorage.removeItem('zt');location.href='/admin';}
+function toast(m,t='success'){const e=document.getElementById('toast');e.textContent=m;e.className='toast show '+t;setTimeout(()=>e.classList.remove('show'),3000);}
+load();
+</script></body></html>

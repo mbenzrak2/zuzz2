@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>M3U Player</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui;background:#0d1117;color:#f0f6fc;min-height:100vh}.hdr{background:#161b22;padding:12px 20px;border-bottom:1px solid #30363d;display:flex;align-items:center;gap:15px;flex-wrap:wrap}.hdr h1{color:#ff5722;font-size:18px}.hdr input,.hdr select{padding:8px 12px;border:1px solid #30363d;border-radius:6px;background:#21262d;color:#f0f6fc;font-size:13px}.hdr input{width:200px}.hdr select{min-width:150px}.hdr button{padding:8px 16px;border:none;border-radius:6px;background:#ff5722;color:#fff;font-weight:600;cursor:pointer;font-size:13px}.hdr button:hover{background:#e64a19}.stats{color:#8b949e;font-size:12px}.stats b{color:#ff5722}.back{color:#8b949e;text-decoration:none;font-size:13px}.back:hover{color:#ff5722}
+.main{display:flex;height:calc(100vh - 56px)}
+.side{width:380px;background:#161b22;border-right:1px solid #30363d;overflow-y:auto;flex-shrink:0}
+.ch{display:flex;align-items:center;padding:10px 15px;border-bottom:1px solid #21262d;gap:10px}
+.ch:hover{background:#21262d}
+.ch.active{background:#21262d;border-left:3px solid #ff5722}
+.ch-info{flex:1;cursor:pointer;min-width:0}
+.cn{font-size:13px;font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cg{font-size:11px;color:#8b949e}
+.ch-add{padding:6px 10px;border:none;border-radius:5px;background:#3fb950;color:#fff;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap}
+.ch-add:hover{background:#2ea043}
+.player{flex:1;background:#000;display:flex;flex-direction:column}
+.ph{background:#161b22;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #30363d;flex-wrap:wrap;gap:10px}
+.now{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btns button{padding:6px 12px;border:1px solid #30363d;border-radius:5px;background:#21262d;color:#f0f6fc;cursor:pointer;font-size:12px}
+.btns button:hover{background:#30363d}
+.btns button.active{background:#ff5722;border-color:#ff5722}
+.vw{flex:1;display:flex;align-items:center;justify-content:center;position:relative}
+video{width:100%;height:100%;background:#000}
+.status{position:absolute;bottom:20px;left:20px;padding:8px 16px;border-radius:6px;font-size:12px;display:none}
+.status.show{display:block}
+.status.ok{background:rgba(63,185,80,0.9)}
+.status.err{background:rgba(248,81,73,0.9)}
+.status.load{background:rgba(255,152,0,0.9)}
+
+/* Modal */
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal.show{display:flex}
+.mbox{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:25px;width:100%;max-width:420px}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.mt{font-size:18px;font-weight:600}
+.mc{background:none;border:none;color:#8b949e;font-size:24px;cursor:pointer}
+.mch{background:#21262d;border:1px solid #30363d;border-radius:8px;padding:15px;margin-bottom:20px}
+.mch-name{font-size:15px;font-weight:600;margin-bottom:5px}
+.mch-url{font-size:11px;color:#8b949e;word-break:break-all}
+.fg{margin-bottom:15px}
+.fg label{display:block;margin-bottom:6px;color:#8b949e;font-size:13px}
+.fg select,.fg input{width:100%;padding:12px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#f0f6fc;font-size:14px}
+.fg select:focus,.fg input:focus{outline:none;border-color:#ff5722}
+.mbtns{display:flex;gap:10px;margin-top:20px}
+.mbtn{flex:1;padding:14px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px}
+.mbtn.cancel{background:#21262d;color:#f0f6fc}
+.mbtn.save{background:linear-gradient(135deg,#3fb950,#2ea043);color:#fff}
+.mbtn.save:hover{opacity:.9}
+
+.toast{position:fixed;bottom:20px;right:20px;padding:14px 24px;background:#161b22;border:1px solid #30363d;border-radius:8px;display:none;z-index:2000;font-weight:500}
+.toast.show{display:block}
+.toast.success{border-color:#3fb950;color:#3fb950}
+.toast.error{border-color:#f85149;color:#f85149}
+
+@media(max-width:768px){.main{flex-direction:column}.side{width:100%;height:40vh}.player{height:60vh}}
+</style></head>
+<body>
+<div class="hdr">
+<a href="/admin/m3u" class="back">← Back</a>
+<h1>📺 M3U Player</h1>
+<input type="text" id="q" placeholder="Search..." autofocus>
+<select id="cat"><option value="">All Categories</option></select>
+<button onclick="filter()">🔍 Filter</button>
+<span class="stats">Channels: <b id="cnt">0</b></span>
+</div>
+
+<div class="main">
+<div class="side" id="list"></div>
+<div class="player">
+<div class="ph">
+<span class="now" id="now">Select a channel</span>
+<div class="btns">
+<button onclick="tryHls()" id="btn-hls">▶️ HLS</button>
+<button onclick="tryMpegts()" id="btn-mpegts">📡 MPEG-TS</button>
+<button onclick="vlc()">📺 VLC</button>
+<button onclick="pot()">🎬 Pot</button>
+<button onclick="copyUrl()">📋 Copy</button>
+</div>
+</div>
+<div class="vw">
+<video id="vid" controls></video>
+<div class="status" id="status">Ready</div>
+</div>
+</div>
+</div>
+
+<!-- Add to ZUZZ Modal -->
+<div class="modal" id="addModal">
+<div class="mbox">
+<div class="mh">
+<span class="mt">➕ Add to ZUZZ TV</span>
+<button class="mc" onclick="closeModal()">×</button>
+</div>
+
+<div class="mch">
+<div class="mch-name" id="modalChName">Channel Name</div>
+<div class="mch-url" id="modalChUrl">http://...</div>
+</div>
+
+<div class="fg">
+<label>📁 Select Category</label>
+<select id="modalCat"></select>
+</div>
+
+<div class="fg">
+<label>😀 Icon (emoji)</label>
+<input type="text" id="modalIcon" value="📺" maxlength="4">
+</div>
+
+<div class="mbtns">
+<button class="mbtn cancel" onclick="closeModal()">Cancel</button>
+<button class="mbtn save" onclick="saveChannel()">✅ Add to ZUZZ</button>
+</div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.12/dist/hls.min.js"></script>
+<script>
+const LID = LIST_ID_HERE;
+const T = localStorage.getItem('zt');
+
+let D = [], F = [], cats = [], zuzzCats = [];
+let cur = null, idx = -1, mp = null, hl = null;
+let pendingChannel = null; // Channel to add
+
+// === LOAD DATA ===
+async function load(){
+    // Load M3U channels
+    const r = await fetch('/api/m3u/channels/' + LID);
+    const d = await r.json();
+    if(!d.success){
+        alert('List not found');
+        location.href = '/admin/m3u';
+        return;
+    }
+    D = d.channels || [];
+    cats = d.list.categories || [];
+    
+    document.getElementById('cat').innerHTML = 
+        '<option value="">All (' + cats.length + ')</option>' + 
+        cats.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('');
+    
+    // Load ZUZZ categories
+    await loadZuzzCats();
+    
+    filter();
+}
+
+async function loadZuzzCats(){
+    try {
+        const r = await fetch('/api/data');
+        const d = await r.json();
+        zuzzCats = d.categories || [];
+        
+        document.getElementById('modalCat').innerHTML = zuzzCats.map(c => 
+            '<option value="' + c.id + '">' + c.icon + ' ' + c.name + '</option>'
+        ).join('');
+    } catch(e) {
+        console.log('Could not load ZUZZ categories');
+    }
+}
+
+// === FILTER & RENDER ===
+function filter(){
+    const q = document.getElementById('q').value.toLowerCase();
+    const c = document.getElementById('cat').value;
+    
+    F = D.filter(x => 
+        (!q || (x.name + x.group).toLowerCase().includes(q)) && 
+        (!c || x.group === c)
+    ).slice(0, 500);
+    
+    document.getElementById('cnt').textContent = F.length;
+    render();
+}
+
+function render(){
+    if(!F.length){
+        document.getElementById('list').innerHTML = '<p style="padding:20px;color:#8b949e;text-align:center">No results</p>';
+        return;
+    }
+    
+    document.getElementById('list').innerHTML = F.map((x, i) => `
+        <div class="ch ${idx === i ? 'active' : ''}">
+            <div class="ch-info" onclick="play(${i})">
+                <div class="cn">${esc(x.name)}</div>
+                <div class="cg">📁 ${esc(x.group)}</div>
+            </div>
+            <button class="ch-add" onclick="openAddModal(${i})">➕ Add</button>
+        </div>
+    `).join('');
+}
+
+// === PLAYER ===
+let retryCount = 0;
+const MAX_RETRIES = 2;
+let loadTimeout = null;
+
+function play(i){
+    idx = i;
+    cur = F[i];
+    retryCount = 0;
+    document.getElementById('now').textContent = cur.name;
+    render();
+    tryHls();
+}
+
+function showStatus(msg, type){
+    const s = document.getElementById('status');
+    s.textContent = msg;
+    s.className = 'status show ' + type;
+    if(type === 'ok') setTimeout(() => s.classList.remove('show'), 3000);
+}
+
+function clearPlayers(){
+    if(loadTimeout) { clearTimeout(loadTimeout); loadTimeout = null; }
+    if(mp){ try{ mp.destroy(); }catch(e){} mp = null; }
+    if(hl){ try{ hl.destroy(); }catch(e){} hl = null; }
+    const v = document.getElementById('vid');
+    v.src = '';
+    v.load();
+    document.querySelectorAll('.btns button').forEach(b => b.classList.remove('active'));
+}
+
+function tryHls(){
+    if(!cur) return;
+    clearPlayers();
+    document.getElementById('btn-hls').classList.add('active');
+    showStatus('⏳ Loading HLS...', 'load');
+    
+    const v = document.getElementById('vid');
+    let url = cur.url;
+    
+    // Auto-add .m3u8 if needed
+    if(!url.includes('.m3u8') && !url.includes('.ts') && !url.includes('?')){
+        url = url + '.m3u8';
+    }
+    
+    // Timeout after 15 seconds
+    loadTimeout = setTimeout(() => {
+        if(retryCount < MAX_RETRIES){
+            retryCount++;
+            showStatus('⏳ Retrying... (' + retryCount + '/' + MAX_RETRIES + ')', 'load');
+            tryHls();
+        } else {
+            showStatus('❌ Timeout - Try MPEG-TS or VLC', 'err');
+        }
+    }, 15000);
+    
+    if(typeof Hls !== 'undefined' && Hls.isSupported()){
+        hl = new Hls({ 
+            enableWorker: true, 
+            lowLatencyMode: true,
+            maxBufferLength: 30,
+            maxMaxBufferLength: 60,
+            startLevel: -1,
+            xhrSetup: function(xhr, url) {
+                xhr.timeout = 10000;
+            }
+        });
+        
+        hl.loadSource(url);
+        hl.attachMedia(v);
+        
+        hl.on(Hls.Events.MANIFEST_PARSED, () => { 
+            clearTimeout(loadTimeout);
+            v.play().catch(() => {}); 
+            showStatus('✅ Playing!', 'ok'); 
+        });
+        
+        hl.on(Hls.Events.ERROR, (e, data) => { 
+            console.log('HLS Error:', data.type, data.details);
+            
+            if(data.fatal){
+                clearTimeout(loadTimeout);
+                
+                if(data.type === Hls.ErrorTypes.NETWORK_ERROR){
+                    if(retryCount < MAX_RETRIES){
+                        retryCount++;
+                        showStatus('🔄 Network error - Retrying... (' + retryCount + '/' + MAX_RETRIES + ')', 'load');
+                        setTimeout(() => {
+                            hl.loadSource(url);
+                            hl.startLoad();
+                        }, 2000);
+                    } else {
+                        showStatus('❌ Network Error - Stream may be offline', 'err');
+                    }
+                } else if(data.type === Hls.ErrorTypes.MEDIA_ERROR){
+                    showStatus('⚠️ Media Error - Trying to recover...', 'load');
+                    hl.recoverMediaError();
+                } else {
+                    showStatus('❌ Stream unavailable - Try VLC or MPEG-TS', 'err');
+                }
+            }
+        });
+        
+        hl.on(Hls.Events.FRAG_LOADED, () => {
+            clearTimeout(loadTimeout);
+        });
+        
+    } else if(v.canPlayType('application/vnd.apple.mpegurl')){
+        v.src = url;
+        v.play().catch(() => {});
+        v.onplaying = () => { clearTimeout(loadTimeout); showStatus('✅ Playing!', 'ok'); };
+        v.onerror = () => { clearTimeout(loadTimeout); showStatus('❌ Stream error', 'err'); };
+    } else {
+        clearTimeout(loadTimeout);
+        showStatus('❌ HLS not supported in this browser', 'err');
+    }
+}
+
+function tryMpegts(){
+    if(!cur) return;
+    clearPlayers();
+    document.getElementById('btn-mpegts').classList.add('active');
+    showStatus('⏳ Loading MPEG-TS...', 'load');
+    
+    const v = document.getElementById('vid');
+    
+    // Timeout after 15 seconds
+    loadTimeout = setTimeout(() => {
+        showStatus('❌ Timeout - Try VLC instead', 'err');
+    }, 15000);
+    
+    if(typeof mpegts !== 'undefined' && mpegts.isSupported()){
+        try {
+            const streamType = cur.url.includes('.m3u8') ? 'hls' : 'mpegts';
+            
+            mp = mpegts.createPlayer({
+                type: streamType,
+                url: cur.url,
+                isLive: true
+            }, { 
+                enableWorker: true, 
+                enableStashBuffer: false,
+                stashInitialSize: 128,
+                lazyLoad: false
+            });
+            
+            mp.attachMediaElement(v);
+            mp.load();
+            mp.play().catch(() => {});
+            
+            mp.on(mpegts.Events.ERROR, (type, detail) => {
+                clearTimeout(loadTimeout);
+                console.log('MPEG-TS Error:', type, detail);
+                showStatus('❌ MPEG-TS Error - Try VLC', 'err');
+            });
+            
+            mp.on(mpegts.Events.LOADING_COMPLETE, () => {
+                clearTimeout(loadTimeout);
+            });
+            
+            v.onplaying = () => { 
+                clearTimeout(loadTimeout); 
+                showStatus('✅ Playing!', 'ok'); 
+            };
+            
+            v.onerror = () => {
+                clearTimeout(loadTimeout);
+                showStatus('❌ Playback Error', 'err');
+            };
+            
+        } catch(e) {
+            clearTimeout(loadTimeout);
+            console.log('MPEG-TS Exception:', e);
+            showStatus('❌ MPEG-TS failed: ' + e.message, 'err');
+        }
+    } else {
+        clearTimeout(loadTimeout);
+        showStatus('❌ MPEG-TS not supported', 'err');
+    }
+}
+
+function vlc(){ if(cur) location.href = 'vlc://' + cur.url; }
+function pot(){ if(cur) location.href = 'potplayer://' + cur.url; }
+function copyUrl(){
+    if(cur){
+        navigator.clipboard.writeText(cur.url);
+        toast('✅ URL copied!', 'success');
+    }
+}
+
+// === ADD TO ZUZZ ===
+function openAddModal(i){
+    pendingChannel = F[i];
+    
+    document.getElementById('modalChName').textContent = pendingChannel.name;
+    document.getElementById('modalChUrl').textContent = pendingChannel.url;
+    document.getElementById('modalIcon').value = '📺';
+    
+    document.getElementById('addModal').classList.add('show');
+}
+
+function closeModal(){
+    document.getElementById('addModal').classList.remove('show');
+    pendingChannel = null;
+}
+
+async function saveChannel(){
+    if(!pendingChannel){
+        toast('❌ No channel selected', 'error');
+        return;
+    }
+    
+    const catId = parseInt(document.getElementById('modalCat').value);
+    const icon = document.getElementById('modalIcon').value || '📺';
+    
+    try {
+        const r = await fetch('/api/channel', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + T
+            },
+            body: JSON.stringify({
+                name: pendingChannel.name,
+                iframe: pendingChannel.url,
+                icon: icon,
+                category_id: catId
+            })
+        });
+        
+        const d = await r.json();
+        
+        if(d.success){
+            toast('✅ "' + pendingChannel.name + '" added to ZUZZ TV!', 'success');
+            closeModal();
+        } else {
+            toast('❌ ' + (d.error || 'Failed to add'), 'error');
+        }
+    } catch(e) {
+        toast('❌ Error: ' + e.message, 'error');
+    }
+}
+
+// === UTILS ===
+function toast(msg, type = 'success'){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function esc(s){
+    return String(s || '').replace(/[<>&"]/g, c => ({'<':'&lt;', '>':'&gt;', '&':'&amp;', '"':'&quot;'})[c]);
+}
+
+// === EVENTS ===
+document.getElementById('q').onkeydown = e => { if(e.key === 'Enter') filter(); };
+document.getElementById('addModal').onclick = e => { if(e.target.id === 'addModal') closeModal(); };
+
+// Start
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Import Events - ZUZZ TV Admin</title>
+<style>
+:root{--p:#ff5722;--bg:#0d1117;--card:#161b22;--hov:#1f2937;--bdr:#30363d;--txt:#f0f6fc;--mut:#8b949e;--ok:#3fb950;--err:#f85149}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui;background:var(--bg);color:var(--txt);min-height:100vh;padding:20px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--bdr);margin-bottom:20px}
+.header h1{font-size:24px;display:flex;align-items:center;gap:10px}
+.header a{color:var(--p);text-decoration:none;font-size:14px}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:25px;margin-bottom:20px}
+.card h2{font-size:18px;margin-bottom:5px}
+.card p{color:var(--mut);font-size:13px;margin-bottom:20px}
+
+.form-row{display:flex;gap:15px;flex-wrap:wrap;margin-bottom:20px}
+.form-group{flex:1;min-width:200px}
+.form-group label{display:block;margin-bottom:6px;font-size:13px;color:var(--mut)}
+.form-group select,.form-group input{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:14px}
+
+.btn{padding:10px 20px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:var(--p);color:#fff}
+.btn-success{background:var(--ok);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.sports-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;max-height:120px;overflow-y:auto;padding:5px 0}
+.sport-tab{padding:8px 14px;background:var(--hov);border:1px solid var(--bdr);border-radius:20px;cursor:pointer;font-size:12px;transition:all .2s;white-space:nowrap}
+.sport-tab:hover{border-color:var(--p)}
+.sport-tab.active{background:var(--p);border-color:var(--p);color:#fff}
+
+.events-table{width:100%;border-collapse:collapse;margin-top:15px}
+.events-table th,.events-table td{padding:12px;text-align:left;border-bottom:1px solid var(--bdr)}
+.events-table th{color:var(--mut);font-size:12px;font-weight:600;text-transform:uppercase}
+.events-table tr:hover{background:var(--hov)}
+.events-table .team{display:flex;align-items:center;gap:8px}
+.events-table .team img{width:24px;height:24px;border-radius:4px}
+.events-table input[type="checkbox"]{width:18px;height:18px;accent-color:var(--p)}
+.events-table input[type="text"]{width:100%;padding:6px 8px;background:var(--bg);border:1px solid var(--bdr);border-radius:4px;color:var(--txt);font-size:12px}
+
+.badge{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-ok{background:rgba(63,185,80,.15);color:var(--ok)}
+.badge-warn{background:rgba(255,152,0,.15);color:#ff9800}
+
+.log-box{background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:15px;max-height:200px;overflow-y:auto;font-family:monospace;font-size:12px;color:var(--mut)}
+.log-box .success{color:var(--ok)}
+.log-box .error{color:var(--err)}
+.log-box .info{color:var(--p)}
+
+.stats{display:flex;gap:15px;margin-bottom:20px}
+.stat{background:var(--hov);padding:15px;border-radius:8px;text-align:center;min-width:100px}
+.stat-value{font-size:24px;font-weight:700;color:var(--p)}
+.stat-label{font-size:11px;color:var(--mut);margin-top:5px}
+
+.empty-state{text-align:center;padding:40px;color:var(--mut)}
+.empty-state .icon{font-size:48px;margin-bottom:15px}
+
+.actions-bar{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:15px;border-top:1px solid var(--bdr)}
+.select-all{display:flex;align-items:center;gap:10px;font-size:13px}
+
+.selection-bar{display:flex;gap:10px;align-items:center;margin-bottom:15px;padding:12px;background:var(--hov);border-radius:8px;flex-wrap:wrap}
+.btn-select{padding:8px 15px;background:var(--bg);border:1px solid var(--bdr);border-radius:6px;color:var(--txt);cursor:pointer;font-size:12px;transition:all .2s}
+.btn-select:hover{border-color:var(--p);background:var(--p);color:#fff}
+.selection-info{margin-left:auto;color:var(--mut);font-size:13px}
+.selection-info span{color:var(--p);font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>📥 Import Events</h1>
+    <a href="/admin/dashboard">← Back to Dashboard</a>
+</div>
+
+<div class="card">
+    <h2>Import Events from SofaScore</h2>
+    <p>Import sport events from SofaScore API</p>
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label>Sport</label>
+            <select id="sport">
+                <option value="football">Football (Soccer)</option>
+                <option value="basketball">Basketball</option>
+                <option value="tennis">Tennis</option>
+                <option value="hockey">Hockey</option>
+                <option value="american-football">American Football (NFL/NCAAF)</option>
+                <option value="baseball">Baseball (MLB)</option>
+                <option value="cricket">Cricket</option>
+                <option value="volleyball">Volleyball</option>
+                <option value="mma">MMA / Boxing</option>
+                <option value="rugby">Rugby</option>
+                <option value="motorsport">Motorsport (F1/NASCAR)</option>
+                <option value="handball">Handball</option>
+                <option value="esports">Esports</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="event-date">
+        </div>
+        <div class="form-group">
+            <label>Category</label>
+            <select id="category"></select>
+        </div>
+        <div class="form-group" style="display:flex;align-items:flex-end">
+            <button class="btn btn-primary" id="fetch-btn" onclick="fetchEvents()">📥 Fetch Events</button>
+        </div>
+    </div>
+    
+    <div class="sports-tabs">
+        <div class="sport-tab active" onclick="selectSport('football',this)">⚽ Football</div>
+        <div class="sport-tab" onclick="selectSport('basketball',this)">🏀 Basketball</div>
+        <div class="sport-tab" onclick="selectSport('american-football',this)">🏈 NFL/NCAAF</div>
+        <div class="sport-tab" onclick="selectSport('hockey',this)">🏒 NHL</div>
+        <div class="sport-tab" onclick="selectSport('baseball',this)">⚾ MLB</div>
+        <div class="sport-tab" onclick="selectSport('mma',this)">🥊 MMA/Boxing</div>
+        <div class="sport-tab" onclick="selectSport('tennis',this)">🎾 Tennis</div>
+        <div class="sport-tab" onclick="selectSport('motorsport',this)">🏎️ F1/NASCAR</div>
+        <div class="sport-tab" onclick="selectSport('rugby',this)">🏉 Rugby</div>
+        <div class="sport-tab" onclick="selectSport('cricket',this)">🏏 Cricket</div>
+        <div class="sport-tab" onclick="selectSport('handball',this)">🤾 Handball</div>
+        <div class="sport-tab" onclick="selectSport('esports',this)">🎮 Esports</div>
+    </div>
+    
+    <button class="btn btn-success" id="import-btn" onclick="importSelected()" disabled>📥 Import Selected</button>
+</div>
+
+<div class="card">
+    <div class="stats" id="stats" style="display:none">
+        <div class="stat"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total</div></div>
+        <div class="stat"><div class="stat-value" id="stat-selected">0</div><div class="stat-label">Selected</div></div>
+        <div class="stat"><div class="stat-value" id="stat-live">0</div><div class="stat-label">Live</div></div>
+    </div>
+    
+    <div id="events-container">
+        <div class="empty-state">
+            <div class="icon">📋</div>
+            <p>Select a sport and date, then click "Fetch Events"</p>
+        </div>
+    </div>
+    
+    <div class="actions-bar" id="actions-bar" style="display:none">
+        <div class="select-all">
+            <input type="checkbox" id="select-all" onchange="toggleSelectAll(this.checked)">
+            <label for="select-all">Select All</label>
+        </div>
+        <button class="btn btn-success" onclick="importSelected()">📥 Import (<span id="selected-count">0</span>)</button>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Import Log</h2>
+    <div class="log-box" id="log-box">Ready to import events...</div>
+</div>
+
+<script>
+const T=localStorage.getItem('zt');
+if(!T)location.href='/admin';
+
+let EVENTS=[];
+let CATEGORIES=[];
+
+document.getElementById('event-date').value=new Date().toISOString().split('T')[0];
+
+async function loadCategories(){
+    try{
+        const r=await fetch('/api/data',{headers:{Authorization:'Bearer '+T}});
+        const d=await r.json();
+        CATEGORIES=d.categories||[];
+        document.getElementById('category').innerHTML=CATEGORIES.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    }catch(e){console.error(e);}
+}
+loadCategories();
+
+function selectSport(sport,el){
+    document.querySelectorAll('.sport-tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('sport').value=sport;
+}
+
+function addLog(msg,type='info'){
+    const log=document.getElementById('log-box');
+    const time=new Date().toLocaleTimeString();
+    log.innerHTML+=`<div class="${type}">[${time}] ${msg}</div>`;
+    log.scrollTop=log.scrollHeight;
+}
+
+async function fetchEvents(){
+    const sport=document.getElementById('sport').value;
+    const date=document.getElementById('event-date').value;
+    const btn=document.getElementById('fetch-btn');
+    
+    if(!date){alert('Select a date');return;}
+    
+    btn.disabled=true;
+    btn.innerHTML='⏳ Fetching...';
+    addLog(`Fetching ${sport} events for ${date}...`,'info');
+    
+    try{
+        const r=await fetch(`/api/import/fetch-events?sport=${sport}&date=${date}`,{headers:{Authorization:'Bearer '+T}});
+        const d=await r.json();
+        
+        if(d.success){
+            EVENTS=d.events||[];
+            renderEvents();
+            addLog(`✅ Found ${EVENTS.length} events`,'success');
+            
+            document.getElementById('stats').style.display='flex';
+            document.getElementById('stat-total').textContent=EVENTS.length;
+            document.getElementById('stat-live').textContent=EVENTS.filter(e=>e.status==='live').length;
+            
+            if(EVENTS.length>0){
+                document.getElementById('actions-bar').style.display='flex';
+                document.getElementById('import-btn').disabled=false;
+            }
+        }else{
+            addLog(`❌ ${d.error}`,'error');
+            alert(d.error);
+        }
+    }catch(e){
+        addLog(`❌ ${e.message}`,'error');
+    }
+    
+    btn.disabled=false;
+    btn.innerHTML='📥 Fetch Events';
+}
+
+function renderEvents(){
+    const container=document.getElementById('events-container');
+    
+    if(!EVENTS.length){
+        container.innerHTML=`<div class="empty-state"><div class="icon">📋</div><p>No events found</p></div>`;
+        return;
+    }
+    
+    let html=`
+    <div class="selection-bar">
+        <button class="btn-select" onclick="selectAll()">☑️ Select All</button>
+        <button class="btn-select" onclick="deselectAll()">⬜ Deselect All</button>
+        <button class="btn-select" onclick="selectLive()">🔴 Select Live Only</button>
+        <span class="selection-info"><span id="selection-count">0</span> / ${EVENTS.length} selected</span>
+    </div>
+    <table class="events-table"><thead><tr>
+        <th><input type="checkbox" id="select-all-header" onchange="toggleSelectAll(this.checked)" title="Select All"></th>
+        <th>Time</th><th>League</th><th>Home</th><th>Away</th><th>Stream URL</th><th>Status</th>
+    </tr></thead><tbody>`;
+    
+    EVENTS.forEach((e,i)=>{
+        const dt=new Date(e.startTime);
+        const status=e.status==='live'?'<span class="badge badge-ok">🔴 LIVE</span>'
+            :e.status==='finished'?'<span class="badge">FT</span>'
+            :'<span class="badge badge-warn">Soon</span>';
+        
+        html+=`<tr>
+            <td><input type="checkbox" class="event-check" data-index="${i}" onchange="updateSelectedCount()"></td>
+            <td>${dt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td>
+            <td>${e.league||'-'}</td>
+            <td><div class="team"><img src="${e.homeLogo}" referrerpolicy="no-referrer" onerror="this.style.display='none'"><span>${e.homeTeam}</span></div></td>
+            <td><div class="team"><img src="${e.awayLogo}" referrerpolicy="no-referrer" onerror="this.style.display='none'"><span>${e.awayTeam}</span></div></td>
+            <td><input type="text" class="stream-url" data-index="${i}" placeholder="Stream URL"></td>
+            <td>${status}</td>
+        </tr>`;
+    });
+    
+    html+=`</tbody></table>`;
+    container.innerHTML=html;
+}
+
+function toggleSelectAll(checked){
+    document.querySelectorAll('.event-check').forEach(cb=>cb.checked=checked);
+    // Sync both checkboxes
+    const headerCb = document.getElementById('select-all-header');
+    const footerCb = document.getElementById('select-all');
+    if(headerCb) headerCb.checked = checked;
+    if(footerCb) footerCb.checked = checked;
+    updateSelectedCount();
+}
+
+function selectAll(){
+    toggleSelectAll(true);
+}
+
+function deselectAll(){
+    toggleSelectAll(false);
+}
+
+function selectLive(){
+    // First deselect all
+    document.querySelectorAll('.event-check').forEach(cb=>cb.checked=false);
+    // Then select only live events
+    EVENTS.forEach((e,i)=>{
+        if(e.status==='live'){
+            const cb=document.querySelector(`.event-check[data-index="${i}"]`);
+            if(cb)cb.checked=true;
+        }
+    });
+    updateSelectedCount();
+}
+
+function updateSelectedCount(){
+    const count=document.querySelectorAll('.event-check:checked').length;
+    const total=EVENTS.length;
+    document.getElementById('selected-count').textContent=count;
+    document.getElementById('stat-selected').textContent=count;
+    document.getElementById('import-btn').disabled=count===0;
+    
+    // Update selection-count in bar
+    const selCount=document.getElementById('selection-count');
+    if(selCount)selCount.textContent=count;
+    
+    // Update header checkbox state
+    const headerCb=document.getElementById('select-all-header');
+    if(headerCb){
+        headerCb.checked=count===total && total>0;
+        headerCb.indeterminate=count>0 && count<total;
+    }
+}
+
+async function importSelected(){
+    const categoryId=parseInt(document.getElementById('category').value);
+    const checks=document.querySelectorAll('.event-check:checked');
+    
+    if(!checks.length){alert('Select at least one event');return;}
+    
+    const events=[];
+    checks.forEach(cb=>{
+        const i=parseInt(cb.dataset.index);
+        const e=EVENTS[i];
+        const streamInput=document.querySelector(`.stream-url[data-index="${i}"]`);
+        
+        events.push({
+            team1:e.homeTeam,
+            team2:e.awayTeam,
+            homeId:e.homeId,
+            awayId:e.awayId,
+            leagueId:e.leagueId||'',
+            match_datetime:e.startTime,
+            category_id:categoryId,
+            stream_url:streamInput?streamInput.value:'',
+            league:e.league||'',
+            sofascore_id:e.id
+        });
+    });
+    
+    addLog(`Importing ${events.length} events...`,'info');
+    
+    try{
+        const r=await fetch('/api/import/save-events',{
+            method:'POST',
+            headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},
+            body:JSON.stringify({events})
+        });
+        const d=await r.json();
+        
+        if(d.success){
+            addLog(`✅ Imported ${d.imported} events!`,'success');
+            alert(`Imported ${d.imported} events!`);
+            document.querySelectorAll('.event-check').forEach(cb=>cb.checked=false);
+            updateSelectedCount();
+        }else{
+            addLog(`❌ ${d.error}`,'error');
+        }
+    }catch(e){
+        addLog(`❌ ${e.message}`,'error');
+    }
+}
+</script>
+</body>
+</html>

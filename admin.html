@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin Dashboard - ZUZZ TV</title>
+<style>:root{--p:#ff5722;--bg:#0d1117;--card:#161b22;--hov:#21262d;--bdr:#30363d;--txt:#f0f6fc;--mut:#8b949e;--ok:#3fb950;--err:#f85149;--warn:#d29922}*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui;background:var(--bg);color:var(--txt);min-height:100vh;display:flex}.side{width:240px;background:var(--card);border-right:1px solid var(--bdr);padding:20px 0;position:fixed;height:100vh;overflow-y:auto}.logo{padding:0 20px 25px;border-bottom:1px solid var(--bdr);margin-bottom:15px}.logo h1{font-size:20px;background:linear-gradient(135deg,#ff5722,#ff9800);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.logo span{font-size:11px;color:var(--mut)}.nav{list-style:none}.ni{padding:12px 20px;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--mut);border-left:3px solid transparent;font-size:14px}.ni:hover{background:var(--hov);color:var(--txt)}.ni.active{background:rgba(255,87,34,.1);color:var(--p);border-left-color:var(--p)}.div{height:1px;background:var(--bdr);margin:12px 20px}.ni.out{color:var(--err)}.main{flex:1;margin-left:240px;padding:25px}.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;flex-wrap:wrap;gap:10px}.hdr h1{font-size:24px}.btn{padding:10px 20px;border-radius:6px;font-weight:600;cursor:pointer;border:none;font-size:13px;display:inline-flex;align-items:center;gap:6px}.bp{background:linear-gradient(135deg,#ff5722,#ff9800);color:#fff}.bs{background:var(--hov);color:var(--txt);border:1px solid var(--bdr)}.bd{background:var(--err);color:#fff}.card{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:20px;margin-bottom:20px}.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;padding-bottom:12px;border-bottom:1px solid var(--bdr)}.ct{font-size:16px;font-weight:600}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:25px}.stat{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:18px}.si{font-size:24px;margin-bottom:6px}.sv{font-size:28px;font-weight:700}.sl{color:var(--mut);font-size:11px}.tbl{width:100%;border-collapse:collapse}.tbl th,.tbl td{padding:12px;text-align:left;border-bottom:1px solid var(--bdr)}.tbl th{color:var(--mut);font-weight:500;font-size:12px;text-transform:uppercase}.tbl tr:hover td{background:var(--hov)}.tbl .ic{font-size:20px}.acts{display:flex;gap:6px}.bi{padding:6px;border-radius:5px;background:var(--hov);border:1px solid var(--bdr);color:var(--txt);cursor:pointer}.bi:hover{background:var(--bdr)}.bi.danger:hover{background:var(--err)}.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:1000}.modal.active{display:flex}.mbox{background:var(--card);border:1px solid var(--bdr);border-radius:12px;width:100%;max-width:500px;padding:25px;max-height:90vh;overflow-y:auto}.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.mt{font-size:18px;font-weight:600}.mc{background:none;border:none;color:var(--mut);font-size:24px;cursor:pointer}.fg{margin-bottom:15px}.fg label{display:block;margin-bottom:6px;color:var(--mut);font-size:13px}.fg input,.fg select{width:100%;padding:10px;background:var(--bg);border:1px solid var(--bdr);border-radius:6px;color:var(--txt);font-size:13px}.fg input:focus,.fg select:focus{outline:none;border-color:var(--p)}.fg small{color:var(--mut);font-size:11px}.fa{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}.page{display:none}.page.active{display:block}.badge{padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600}.bok{background:rgba(63,185,80,.2);color:var(--ok)}.berr{background:rgba(248,81,73,.2);color:var(--err)}.badm{background:rgba(255,87,34,.2);color:var(--p)}.busr{background:rgba(139,148,158,.2);color:var(--mut)}.toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;background:var(--card);border:1px solid var(--bdr);border-radius:8px;display:none;z-index:2000}.toast.show{display:block}.toast.success{border-color:var(--ok)}.toast.error{border-color:var(--err)}
+.server-row{display:flex;gap:8px;margin-bottom:8px;align-items:center}.server-row input{flex:1}.server-row .num{background:var(--p);color:#fff;padding:4px 10px;border-radius:5px;font-size:12px;font-weight:600}.server-row .del{background:var(--err);border:none;color:#fff;padding:6px 10px;border-radius:5px;cursor:pointer}
+.toggle{position:relative;width:50px;height:26px}.toggle input{opacity:0;width:0;height:0}.toggle .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--err);transition:.3s;border-radius:26px}.toggle .slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;transition:.3s;border-radius:50%}.toggle input:checked+.slider{background:var(--ok)}.toggle input:checked+.slider:before{transform:translateX(24px)}
+.file-upload{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px}.file-upload input[type=file]{display:none}.file-btn{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--bg);border:1px solid var(--bdr);border-radius:6px;cursor:pointer;font-size:13px;color:var(--txt)}.file-btn:hover{background:var(--hov)}.logo-preview{width:80px;height:80px;border-radius:8px;object-fit:contain;background:var(--bg);border:1px solid var(--bdr);display:none}.logo-preview.show{display:block}
+.match-row{display:flex;align-items:center;gap:15px;padding:15px;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;margin-bottom:10px}.match-teams{display:flex;align-items:center;gap:10px;flex:1}.match-team{display:flex;align-items:center;gap:8px}.match-team img{width:40px;height:40px;border-radius:6px;object-fit:contain;background:var(--hov)}.match-vs{color:var(--p);font-weight:700;font-size:12px}.match-info{flex:1;text-align:center}.match-time{font-size:14px;font-weight:600}.match-date{font-size:11px;color:var(--mut)}.match-countdown{font-size:11px;color:var(--p);background:rgba(255,87,34,.1);padding:4px 10px;border-radius:20px;margin-top:5px;display:inline-block}
+</style></head>
+<body>
+<aside class="side"><div class="logo"><h1>ZUZZ TV</h1><span>Admin Panel v2.0</span></div>
+<ul class="nav">
+<li class="ni active" onclick="go('dash',this)">📊 Dashboard</li>
+<div class="div"></div>
+<li class="ni" onclick="go('ch',this)">📺 Channels</li>
+<li class="ni" onclick="go('matches',this)">⚽ Scheduled Matches</li>
+<li class="ni" onclick="go('cat',this)">🏷️ Categories</li>
+<li class="ni" onclick="go('usr',this)">👥 Admins</li>
+<div class="div"></div>
+<li class="ni" onclick="go('viewers',this)">👤 Viewers</li>
+<li class="ni" onclick="go('plans',this)">💰 Plans & Pricing</li>
+<li class="ni" onclick="go('subs',this)">💳 Subscriptions</li>
+<li class="ni" onclick="go('analytics',this)">📈 Analytics</li>
+<div class="div"></div>
+<li class="ni" onclick="location.href='/admin/m3u'">📥 M3U Import</li>
+<li class="ni" onclick="location.href='/admin/import'">⚽ Import Events</li>
+<li class="ni" onclick="go('settings',this)">⚙️ Settings</li>
+<div class="div"></div>
+<li class="ni" onclick="window.open('/')">👁️ View Site</li>
+<li class="ni out" onclick="logout()">🚪 Logout</li>
+</ul></aside>
+
+<main class="main">
+<!-- Dashboard -->
+<section id="p-dash" class="page active">
+<div class="hdr"><h1>📊 Dashboard</h1></div>
+<div class="stats">
+<div class="stat"><div class="si">📺</div><div class="sv" id="s1">0</div><div class="sl">Channels</div></div>
+<div class="stat"><div class="si">⚽</div><div class="sv" id="s-matches">0</div><div class="sl">Matches</div></div>
+<div class="stat"><div class="si">👤</div><div class="sv" id="s3">0</div><div class="sl">Viewers</div></div>
+<div class="stat"><div class="si">💳</div><div class="sv" id="s4">0</div><div class="sl">Subscribers</div></div>
+</div>
+<div class="card" style="display:flex;gap:15px;flex-wrap:wrap">
+<a href="/admin/import" class="btn bp" style="text-decoration:none">📥 Import Events from SofaScore</a>
+<a href="/admin/m3u" class="btn bs" style="text-decoration:none">📺 M3U Import</a>
+</div>
+<div class="card"><div class="ch"><span class="ct">⚽ Upcoming Matches</span><button class="btn bs" onclick="go('matches')">View All →</button></div><div id="dash-matches"></div></div>
+<div class="card"><div class="ch"><span class="ct">🏆 Popular Channels</span></div><table class="tbl"><thead><tr><th>Channel</th><th>Views</th></tr></thead><tbody id="t-pop"></tbody></table></div>
+</section>
+
+<!-- Channels -->
+<section id="p-ch" class="page">
+<div class="hdr"><h1>📺 Channels</h1><button class="btn bp" onclick="openCh()">+ Add Channel</button></div>
+<div class="card"><table class="tbl"><thead><tr><th>Active</th><th></th><th>Name</th><th>Servers</th><th>Category</th><th>Actions</th></tr></thead><tbody id="t1"></tbody></table></div>
+</section>
+
+<!-- Scheduled Matches -->
+<section id="p-matches" class="page">
+<div class="hdr"><h1>⚽ Scheduled Matches</h1><button class="btn bp" onclick="openMatch()">+ Add Match</button><a href="/admin/import" class="btn bs" style="text-decoration:none;margin-left:10px">📥 Import from SofaScore</a></div>
+<div class="stats">
+<div class="stat"><div class="si">⚽</div><div class="sv" id="match-total">0</div><div class="sl">Total</div></div>
+<div class="stat"><div class="si">🔴</div><div class="sv" id="match-live">0</div><div class="sl">Live</div></div>
+<div class="stat"><div class="si">📅</div><div class="sv" id="match-upcoming">0</div><div class="sl">Upcoming</div></div>
+</div>
+<div class="card"><div class="ch"><span class="ct">📅 All Matches</span></div><div id="matches-list"></div></div>
+</section>
+
+<!-- Categories -->
+<section id="p-cat" class="page">
+<div class="hdr"><h1>🏷️ Categories</h1><button class="btn bp" onclick="openCat()">+ Add Category</button></div>
+<div class="card"><table class="tbl"><thead><tr><th></th><th>Name</th><th>Channels</th><th>Actions</th></tr></thead><tbody id="t2"></tbody></table></div>
+</section>
+
+<!-- Admins -->
+<section id="p-usr" class="page">
+<div class="hdr"><h1>👥 Admin Users</h1><button class="btn bp" onclick="openUsr()">+ Add Admin</button></div>
+<div class="card"><table class="tbl"><thead><tr><th>Username</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead><tbody id="t3"></tbody></table></div>
+</section>
+
+<!-- Viewers Management -->
+<section id="p-viewers" class="page">
+<div class="hdr"><h1>👤 Viewers Management</h1><button class="btn bp" onclick="openViewer()">+ Add Viewer</button></div>
+<div class="card"><table class="tbl"><thead><tr><th>Username</th><th>Email</th><th>Subscription</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="t-viewers"></tbody></table></div>
+</section>
+
+<!-- Plans & Pricing -->
+<section id="p-plans" class="page">
+<div class="hdr"><h1>💰 Plans & Pricing</h1><button class="btn bp" onclick="openPlan()">+ Add Plan</button></div>
+<div class="card">
+<table class="tbl">
+<thead><tr><th>Name</th><th>Days</th><th>Price</th><th>Original</th><th>Devices</th><th>Featured</th><th>Actions</th></tr></thead>
+<tbody id="t-plans"></tbody>
+</table>
+</div>
+</section>
+
+<!-- Subscriptions -->
+<section id="p-subs" class="page">
+<div class="hdr"><h1>💳 Subscriptions</h1></div>
+<div class="stats">
+<div class="stat"><div class="si">💰</div><div class="sv" id="sub-total">$0</div><div class="sl">Revenue</div></div>
+<div class="stat"><div class="si">📅</div><div class="sv" id="sub-active">0</div><div class="sl">Active</div></div>
+</div>
+<div class="card"><table class="tbl"><thead><tr><th>Viewer</th><th>Plan</th><th>Price</th><th>Expires</th></tr></thead><tbody id="t-subs"></tbody></table></div>
+</section>
+
+<!-- Analytics -->
+<section id="p-analytics" class="page">
+<div class="hdr"><h1>📈 Analytics</h1></div>
+<div class="stats">
+<div class="stat"><div class="si">👁️</div><div class="sv" id="an-views">0</div><div class="sl">Views Today</div></div>
+<div class="stat"><div class="si">👤</div><div class="sv" id="an-users">0</div><div class="sl">Users</div></div>
+</div>
+<div class="card"><table class="tbl"><thead><tr><th>Channel</th><th>Views</th></tr></thead><tbody id="t-analytics"></tbody></table></div>
+</section>
+
+<!-- Settings -->
+<section id="p-settings" class="page">
+<div class="hdr"><h1>⚙️ Settings</h1></div>
+<div class="card">
+<div class="ch"><span class="ct">🌐 General Settings</span></div>
+<div class="fg"><label>Site Name</label><input type="text" id="set-name" value="ZUZZ TV"></div>
+<div class="fg" style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="set-sub" style="width:auto"><label style="margin:0">Require Subscription</label></div>
+<div class="fg" style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="set-refresh" style="width:auto" checked><label style="margin:0">Auto-Refresh M3U</label></div>
+<div class="fg"><label>Refresh Hours</label><input type="number" id="set-hours" value="6" style="width:100px"></div>
+</div>
+
+<div class="card">
+<div class="ch"><span class="ct">⚽ SofaScore API (RapidAPI)</span></div>
+<p style="color:var(--mut);font-size:12px;margin-bottom:15px">Get your API key from <a href="https://rapidapi.com/fluis.lacasse/api/sofascore" target="_blank" style="color:var(--p)">RapidAPI SofaScore</a></p>
+<div class="fg"><label>RapidAPI Key</label><input type="password" id="sofascore-key" placeholder="Your RapidAPI Key"></div>
+<div class="fg"><label>RapidAPI Host</label><input type="text" id="sofascore-host" value="sportapi7.p.rapidapi.com"></div>
+</div>
+
+<div class="card">
+<div class="ch"><span class="ct">💳 PayPal Settings</span></div>
+<div class="fg"><label>App Name</label><input type="text" id="paypal-app" placeholder="Your PayPal App Name"></div>
+<div class="fg"><label>Client ID</label><input type="text" id="paypal-client" placeholder="PayPal Client ID"></div>
+<div class="fg"><label>Secret</label><input type="password" id="paypal-secret" placeholder="PayPal Secret Key"></div>
+</div>
+
+<div class="card">
+<div class="ch"><span class="ct">📧 SMTP Email Settings</span></div>
+<div class="fg"><label>SMTP Host</label><input type="text" id="smtp-host" placeholder="smtp.gmail.com"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+<div class="fg"><label>SMTP Port</label><input type="number" id="smtp-port" value="587" placeholder="587"></div>
+<div class="fg" style="display:flex;align-items:center;gap:10px;margin-top:25px"><input type="checkbox" id="smtp-tls" style="width:auto" checked><label style="margin:0">Use TLS</label></div>
+</div>
+<div class="fg"><label>SMTP Username</label><input type="text" id="smtp-user" placeholder="your@email.com"></div>
+<div class="fg"><label>SMTP Password</label><input type="password" id="smtp-pass" placeholder="App password"></div>
+<div class="fg"><label>From Email</label><input type="text" id="smtp-from" placeholder="noreply@yoursite.com (optional)"></div>
+<div style="display:flex;gap:10px;margin-top:15px">
+<input type="email" id="test-email" placeholder="Test email address" style="flex:1;padding:10px;background:var(--bg);border:1px solid var(--bdr);border-radius:6px;color:var(--txt)">
+<button class="btn bs" onclick="testSmtp()">📧 Test SMTP</button>
+</div>
+<div id="smtp-result" style="margin-top:10px;font-size:13px"></div>
+</div>
+
+<button class="btn bp" onclick="saveSettings()" style="margin-top:15px">💾 Save All Settings</button>
+</section>
+</main>
+
+<!-- Channel Modal -->
+<div class="modal" id="mCh"><div class="mbox">
+<div class="mh"><span class="mt" id="mCh-t">Add Channel</span><button class="mc" onclick="closeModal('mCh')">×</button></div>
+<input type="hidden" id="ch-id">
+<input type="hidden" id="ch-current-icon">
+<div class="fg"><label>Name</label><input id="ch-name" required></div>
+<div class="fg"><label>Icon (Emoji or Image)</label>
+<div style="display:flex;gap:10px;align-items:center">
+<div id="ch-icon-preview" style="width:50px;height:50px;background:var(--bg);border:2px dashed var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px">📺</div>
+<div style="flex:1">
+<input id="ch-icon" value="📺" maxlength="4" placeholder="Emoji" oninput="updateChIconPreview()" style="margin-bottom:8px">
+<input type="file" id="ch-icon-file" accept="image/*" onchange="previewChIcon(this)" style="font-size:12px">
+</div>
+</div>
+</div>
+<div class="fg"><label>Category</label><select id="ch-cat"></select></div>
+<div class="fg" style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="ch-active" style="width:auto" checked><label style="margin:0">Active</label></div>
+<div class="fg"><label>Servers</label><div id="servers-list"></div><button type="button" class="btn bs" onclick="addServer()">+ Add Server</button></div>
+<div class="fa"><button class="btn bs" onclick="closeModal('mCh')">Cancel</button><button class="btn bp" onclick="saveCh()">Save</button></div>
+</div></div>
+
+<!-- Match Modal -->
+<div class="modal" id="mMatch"><div class="mbox">
+<div class="mh"><span class="mt">➕ Add Match</span><button class="mc" onclick="closeModal('mMatch')">×</button></div>
+<form id="matchForm" enctype="multipart/form-data">
+<input type="hidden" id="match-id">
+<div class="fg"><label>🏠 Team 1 Name</label><input id="match-team1" required placeholder="e.g. Texas Rangers"></div>
+<div class="fg"><label>🏠 Team 1 Logo</label>
+<div class="file-upload">
+<label class="file-btn" for="match-logo1">📁 Choisir un fichier <span id="logo1-name"></span></label>
+<input type="file" id="match-logo1" accept="image/*" onchange="previewLogo(this,'preview1','logo1-name')">
+<img id="preview1" class="logo-preview">
+</div></div>
+<div class="fg"><label>✈️ Team 2 Name</label><input id="match-team2" required placeholder="e.g. Los Angeles Angels"></div>
+<div class="fg"><label>✈️ Team 2 Logo</label>
+<div class="file-upload">
+<label class="file-btn" for="match-logo2">📁 Choisir un fichier <span id="logo2-name"></span></label>
+<input type="file" id="match-logo2" accept="image/*" onchange="previewLogo(this,'preview2','logo2-name')">
+<img id="preview2" class="logo-preview">
+</div></div>
+<div class="fg"><label>🏷️ Category</label><select id="match-cat"></select></div>
+<div class="fg"><label>📺 Live Stream URL</label><input id="match-url" placeholder="http://..."><small>Direct link to live match stream</small></div>
+<div class="fg"><label>📅 Match Date & Time</label><input type="datetime-local" id="match-datetime" required></div>
+<div class="fa"><button type="button" class="btn bs" onclick="closeModal('mMatch')">Cancel</button><button type="submit" class="btn bp">✅ Save Match</button></div>
+</form>
+</div></div>
+
+<!-- Category Modal -->
+<div class="modal" id="mCat"><div class="mbox">
+<div class="mh"><span class="mt">Add Category</span><button class="mc" onclick="closeModal('mCat')">×</button></div>
+<input type="hidden" id="cat-id">
+<input type="hidden" id="cat-current-icon">
+<div class="fg"><label>Name</label><input id="cat-name" required placeholder="e.g. Sports, Movies"></div>
+<div class="fg">
+<label>Icon (Image or Emoji)</label>
+<div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+<div id="cat-icon-preview" style="width:50px;height:50px;background:var(--bg);border:2px dashed var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden">🏷️</div>
+<div style="flex:1">
+<input type="file" id="cat-icon-file" accept="image/*" onchange="previewCatIcon(this)" style="display:none">
+<button type="button" class="btn bs" onclick="document.getElementById('cat-icon-file').click()" style="width:100%;margin-bottom:8px">📁 Upload Image</button>
+<input id="cat-icon" placeholder="Or enter emoji: 🏷️ ⚽ 🎬" maxlength="4" style="width:100%">
+</div>
+</div>
+<small style="color:var(--mut)">Upload PNG/JPG or enter an emoji</small>
+</div>
+<div class="fa"><button class="btn bs" onclick="closeModal('mCat')">Cancel</button><button class="btn bp" onclick="saveCat()">Save</button></div>
+</div></div>
+
+<!-- User Modal -->
+<div class="modal" id="mUsr"><div class="mbox">
+<div class="mh"><span class="mt">Add Admin</span><button class="mc" onclick="closeModal('mUsr')">×</button></div>
+<input type="hidden" id="usr-id">
+<div class="fg"><label>Username</label><input id="usr-name" required></div>
+<div class="fg"><label>Password</label><input type="password" id="usr-pass"></div>
+<div class="fa"><button class="btn bs" onclick="closeModal('mUsr')">Cancel</button><button class="btn bp" onclick="saveUsr()">Save</button></div>
+</div></div>
+
+<!-- Viewer Modal -->
+<div class="modal" id="mViewer"><div class="mbox">
+<div class="mh"><span class="mt" id="mViewer-title">Add Viewer</span><button class="mc" onclick="closeModal('mViewer')">×</button></div>
+<input type="hidden" id="viewer-id">
+<div class="fg"><label>Username</label><input id="viewer-username" required></div>
+<div class="fg"><label>Email</label><input type="email" id="viewer-email" required></div>
+<div class="fg"><label>Password</label><input type="password" id="viewer-pass" placeholder="Min 6 characters"></div>
+<div class="fg" id="viewer-sub-section" style="display:none">
+<label>Subscription</label>
+<select id="viewer-plan">
+<option value="">No subscription</option>
+</select>
+</div>
+<div class="fa"><button class="btn bs" onclick="closeModal('mViewer')">Cancel</button><button class="btn bp" onclick="saveViewer()">Save</button></div>
+</div></div>
+
+<!-- Plan Modal -->
+<div class="modal" id="mPlan"><div class="mbox">
+<div class="mh"><span class="mt" id="mPlan-title">Add Plan</span><button class="mc" onclick="closeModal('mPlan')">×</button></div>
+<input type="hidden" id="plan-id">
+<div class="fg"><label>Plan Name</label><input id="plan-name" required placeholder="e.g. Monthly Pass"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+<div class="fg"><label>Days</label><input type="number" id="plan-days" required placeholder="30" min="1"></div>
+<div class="fg"><label>Devices</label><input type="number" id="plan-devices" value="1" min="1" max="10"></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+<div class="fg"><label>Price ($)</label><input type="number" id="plan-price" required placeholder="19.99" step="0.01" min="0"></div>
+<div class="fg"><label>Original Price ($)</label><input type="number" id="plan-original" placeholder="Optional" step="0.01" min="0"></div>
+</div>
+<div class="fg" style="display:flex;align-items:center;gap:10px">
+<input type="checkbox" id="plan-featured" style="width:auto">
+<label style="margin:0">⭐ Featured (Best Value badge)</label>
+</div>
+<div class="fa"><button class="btn bs" onclick="closeModal('mPlan')">Cancel</button><button class="btn bp" onclick="savePlan()">Save Plan</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const T=localStorage.getItem('zt');if(!T)location.href='/admin';
+let D={categories:[],channels:[]},MATCHES=[],VIEWERS=[],AN={};
+
+function go(p,el){
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+    document.getElementById('p-'+p).classList.add('active');
+    document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
+    if(el)el.classList.add('active');
+    if(p==='matches')loadMatches();
+}
+
+async function load(){
+    const r=await fetch('/api/data',{headers:{Authorization:'Bearer '+T}});
+    D=await r.json();
+    try{const v=await fetch('/api/viewers',{headers:{Authorization:'Bearer '+T}});const vd=await v.json();if(vd.success)VIEWERS=vd.viewers||[];}catch(e){}
+    try{const a=await fetch('/api/analytics',{headers:{Authorization:'Bearer '+T}});AN=await a.json();}catch(e){}
+    try{
+        const s=await fetch('/api/settings',{headers:{Authorization:'Bearer '+T}});
+        const sd=await s.json();
+        console.log('Settings loaded:', sd);
+        if(sd.success){
+            document.getElementById('set-name').value=sd.settings.site_name||'ZUZZ TV';
+            document.getElementById('set-sub').checked=sd.settings.require_subscription===true;
+            document.getElementById('set-refresh').checked=sd.settings.m3u_auto_refresh!==false;
+            document.getElementById('set-hours').value=sd.settings.m3u_refresh_hours||6;
+            loadSmtpSettings(sd.settings);
+        }
+    }catch(e){console.log('Settings error:',e);}
+    await loadMatches();
+    render();
+}
+
+async function loadMatches(){
+    try{
+        const r=await fetch('/api/matches',{headers:{Authorization:'Bearer '+T}});
+        const d=await r.json();
+        MATCHES=d.matches||[];
+        renderMatches();
+    }catch(e){console.log(e);}
+}
+
+function render(){
+    document.getElementById('s1').textContent=D.channels?.length||0;
+    document.getElementById('s3').textContent=VIEWERS.length;
+    document.getElementById('s4').textContent=VIEWERS.filter(v=>v.subscription).length;
+    document.getElementById('s-matches').textContent=MATCHES.length;
+    
+    // Channels
+    document.getElementById('t1').innerHTML=(D.channels||[]).map(c=>{
+        const cat=D.categories.find(x=>x.id===c.category_id);
+        const sc=c.servers?c.servers.length:1;
+        const active=c.active!==false;
+        const chIconHtml=c.icon&&c.icon.startsWith('/uploads')
+            ?`<img src="${c.icon}" style="width:32px;height:32px;border-radius:6px;object-fit:cover">`
+            :(c.icon||'📺');
+        return`<tr>
+            <td><label class="toggle"><input type="checkbox" ${active?'checked':''} onchange="toggleCh(${c.id},this.checked)"><span class="slider"></span></label></td>
+            <td class="ic">${chIconHtml}</td><td>${esc(c.name)}</td>
+            <td><span class="badge bok">${sc}</span></td><td>${cat?.name||'-'}</td>
+            <td class="acts"><button class="bi" onclick="editCh(${c.id})">✏️</button><button class="bi danger" onclick="delCh(${c.id})">🗑️</button></td>
+        </tr>`;
+    }).join('');
+    
+    // Categories
+    document.getElementById('t2').innerHTML=(D.categories||[]).map(c=>{
+        const n=D.channels.filter(x=>x.category_id===c.id).length;
+        const iconHtml=c.icon&&c.icon.startsWith('/uploads')
+            ?`<img src="${c.icon}" style="width:32px;height:32px;border-radius:6px;object-fit:cover">`
+            :(c.icon||'🏷️');
+        return`<tr><td class="ic">${iconHtml}</td><td>${esc(c.name)}</td><td>${n}</td><td class="acts"><button class="bi" onclick="editCat(${c.id})">✏️</button><button class="bi danger" onclick="delCat(${c.id})">🗑️</button></td></tr>`;
+    }).join('');
+    
+    // Users
+    document.getElementById('t3').innerHTML=(D.users||[]).map(u=>`<tr><td><b>${esc(u.username)}</b></td><td><span class="badge badm">${u.role}</span></td><td>${u.created||'-'}</td><td class="acts"><button class="bi" onclick="editUsr(${u.id})">✏️</button>${u.id!==1?`<button class="bi danger" onclick="delUsr(${u.id})">🗑️</button>`:''}</td></tr>`).join('');
+    
+    // Cat selects - show name only (emoji/image doesn't work in select)
+    const catOpts=D.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    document.getElementById('ch-cat').innerHTML=catOpts;
+    document.getElementById('match-cat').innerHTML=catOpts;
+    
+    // Viewers
+    document.getElementById('t-viewers').innerHTML=VIEWERS.map(v=>{
+        const subText=v.subscription?`<span class="badge bok">${v.subscription.plan_name||v.subscription.plan}</span>`:'<span class="badge busr">No subscription</span>';
+        return `<tr>
+            <td><b>${esc(v.username)}</b></td>
+            <td>${esc(v.email)}</td>
+            <td>${subText}</td>
+            <td>${v.created}</td>
+            <td class="acts">
+                <button class="bi" onclick="editViewer(${v.id})">✏️</button>
+                <button class="bi danger" onclick="delViewer(${v.id})">🗑️</button>
+            </td>
+        </tr>`;
+    }).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--mut)">No viewers yet</td></tr>';
+    
+    // Analytics
+    document.getElementById('an-views').textContent=AN.today?.views||0;
+    document.getElementById('an-users').textContent=AN.today?.users||0;
+    document.getElementById('t-pop').innerHTML=(AN.popular||[]).slice(0,5).map(c=>`<tr><td>${esc(c.name)}</td><td><span class="badge bok">${c.views}</span></td></tr>`).join('');
+    document.getElementById('t-analytics').innerHTML=(AN.popular||[]).map(c=>`<tr><td>${esc(c.name)}</td><td><span class="badge bok">${c.views}</span></td></tr>`).join('');
+    
+    // Plans
+    renderPlans();
+}
+
+function renderMatches(){
+    const now=new Date();
+    let live=0,upcoming=0;
+    
+    document.getElementById('dash-matches').innerHTML=MATCHES.filter(m=>m.active!==false).slice(0,3).map(m=>{
+        const mt=new Date(m.match_datetime);
+        const diff=mt-now;
+        const days=Math.floor(diff/(1000*60*60*24));
+        let cd=days>0?`in ${days}d`:(diff>0?'Today':'Live');
+        return`<div class="match-row">
+            <div class="match-teams">
+                <div class="match-team"><img src="${m.logo1||'/icon-192.png'}"><span>${esc(m.team1)}</span></div>
+                <span class="match-vs">VS</span>
+                <div class="match-team"><img src="${m.logo2||'/icon-192.png'}"><span>${esc(m.team2)}</span></div>
+            </div>
+            <div class="match-info"><div class="match-time">${mt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div><div class="match-date">${mt.toLocaleDateString()}</div><div class="match-countdown">${cd}</div></div>
+        </div>`;
+    }).join('')||'<p style="color:var(--mut);text-align:center;padding:20px">No upcoming matches</p>';
+    
+    document.getElementById('matches-list').innerHTML=MATCHES.map(m=>{
+        const mt=new Date(m.match_datetime);
+        const diff=mt-now;
+        const days=Math.floor(diff/(1000*60*60*24));
+        if(diff<=0&&diff>-3*60*60*1000)live++;
+        else if(diff>0)upcoming++;
+        let cd=days>0?`in ${days} days`:(diff>0?'Today':'<span class="badge bok">LIVE</span>');
+        if(diff<-3*60*60*1000)cd='<span class="badge busr">Ended</span>';
+        
+        return`<div class="match-row">
+            <label class="toggle"><input type="checkbox" ${m.active!==false?'checked':''} onchange="toggleMatch(${m.id},this.checked)"><span class="slider"></span></label>
+            <div class="match-teams">
+                <div class="match-team"><img src="${m.logo1||'/icon-192.png'}"><span>${esc(m.team1)}</span></div>
+                <span class="match-vs">VS</span>
+                <div class="match-team"><img src="${m.logo2||'/icon-192.png'}"><span>${esc(m.team2)}</span></div>
+            </div>
+            <div class="match-info"><div class="match-time">${mt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div><div class="match-date">${mt.toLocaleDateString()}</div><div class="match-countdown">${cd}</div></div>
+            <div class="acts"><button class="bi" onclick="editMatch(${m.id})">✏️</button><button class="bi danger" onclick="delMatch(${m.id})">🗑️</button></div>
+        </div>`;
+    }).join('')||'<p style="color:var(--mut);text-align:center;padding:40px">No matches. Add one!</p>';
+    
+    document.getElementById('match-total').textContent=MATCHES.length;
+    document.getElementById('match-live').textContent=live;
+    document.getElementById('match-upcoming').textContent=upcoming;
+}
+
+// Match functions
+function openMatch(){
+    document.getElementById('match-id').value='';
+    document.getElementById('match-team1').value='';
+    document.getElementById('match-team2').value='';
+    document.getElementById('match-url').value='';
+    document.getElementById('match-datetime').value='';
+    document.getElementById('match-logo1').value='';
+    document.getElementById('match-logo2').value='';
+    document.getElementById('preview1').classList.remove('show');
+    document.getElementById('preview2').classList.remove('show');
+    document.getElementById('logo1-name').textContent='';
+    document.getElementById('logo2-name').textContent='';
+    document.getElementById('mMatch').classList.add('active');
+}
+
+function editMatch(id){
+    const m=MATCHES.find(x=>x.id===id);if(!m)return;
+    document.getElementById('match-id').value=m.id;
+    document.getElementById('match-team1').value=m.team1||'';
+    document.getElementById('match-team2').value=m.team2||'';
+    document.getElementById('match-url').value=m.stream_url||'';
+    document.getElementById('match-cat').value=m.category_id||1;
+    if(m.match_datetime){
+        const dt=new Date(m.match_datetime);
+        document.getElementById('match-datetime').value=dt.toISOString().slice(0,16);
+    }
+    if(m.logo1){document.getElementById('preview1').src=m.logo1;document.getElementById('preview1').classList.add('show');}
+    if(m.logo2){document.getElementById('preview2').src=m.logo2;document.getElementById('preview2').classList.add('show');}
+    document.getElementById('mMatch').classList.add('active');
+}
+
+document.getElementById('matchForm').onsubmit=async function(e){
+    e.preventDefault();
+    const form=new FormData();
+    form.append('id',document.getElementById('match-id').value);
+    form.append('team1',document.getElementById('match-team1').value);
+    form.append('team2',document.getElementById('match-team2').value);
+    form.append('category_id',document.getElementById('match-cat').value);
+    form.append('stream_url',document.getElementById('match-url').value);
+    form.append('match_datetime',document.getElementById('match-datetime').value);
+    
+    const logo1=document.getElementById('match-logo1').files[0];
+    const logo2=document.getElementById('match-logo2').files[0];
+    if(logo1)form.append('logo1',logo1);
+    if(logo2)form.append('logo2',logo2);
+    
+    const r=await fetch('/api/match/save',{method:'POST',headers:{Authorization:'Bearer '+T},body:form});
+    const d=await r.json();
+    if(d.success){toast('✅ Match saved!');closeModal('mMatch');loadMatches();}
+    else toast(d.error||'Error','error');
+};
+
+async function toggleMatch(id,active){
+    await fetch('/api/match/toggle',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify({id,active})});
+    toast(active?'✅ Visible':'⏸️ Hidden');
+}
+
+async function delMatch(id){
+    if(!confirm('Delete this match?'))return;
+    await fetch('/api/match/delete',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify({id})});
+    toast('🗑️ Deleted');loadMatches();
+}
+
+function previewLogo(input,previewId,nameId){
+    const file=input.files[0];
+    if(file){
+        document.getElementById(nameId).textContent=file.name;
+        const reader=new FileReader();
+        reader.onload=e=>{document.getElementById(previewId).src=e.target.result;document.getElementById(previewId).classList.add('show');};
+        reader.readAsDataURL(file);
+    }
+}
+
+// Channel functions
+let serverCount=0;
+let chIconFile=null;
+
+function previewChIcon(input){
+    if(input.files&&input.files[0]){
+        chIconFile=input.files[0];
+        const reader=new FileReader();
+        reader.onload=function(e){
+            document.getElementById('ch-icon-preview').innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:6px">`;
+            document.getElementById('ch-icon').value='';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function updateChIconPreview(){
+    const icon=document.getElementById('ch-icon').value;
+    const preview=document.getElementById('ch-icon-preview');
+    if(icon&&!chIconFile){
+        preview.innerHTML=icon;
+    }
+}
+
+function openCh(){
+    chIconFile=null;
+    document.getElementById('ch-id').value='';
+    document.getElementById('ch-current-icon').value='';
+    document.getElementById('ch-name').value='';
+    document.getElementById('ch-icon').value='📺';
+    document.getElementById('ch-icon-file').value='';
+    document.getElementById('ch-icon-preview').innerHTML='📺';
+    document.getElementById('ch-active').checked=true;
+    document.getElementById('servers-list').innerHTML='';
+    serverCount=0;addServer();
+    document.getElementById('mCh-t').textContent='Add Channel';
+    document.getElementById('mCh').classList.add('active');
+}
+
+function addServer(url=''){
+    serverCount++;
+    const div=document.createElement('div');
+    div.className='server-row';
+    div.innerHTML=`<span class="num">S${serverCount}</span><input type="text" class="srv-url" value="${url}" placeholder="http://..."><button type="button" class="del" onclick="this.parentElement.remove()">×</button>`;
+    document.getElementById('servers-list').appendChild(div);
+}
+
+function editCh(id){
+    chIconFile=null;
+    const c=D.channels.find(x=>x.id===id);if(!c)return;
+    document.getElementById('ch-id').value=c.id;
+    document.getElementById('ch-current-icon').value=c.icon||'';
+    document.getElementById('ch-name').value=c.name;
+    document.getElementById('ch-icon').value=c.icon&&!c.icon.startsWith('/uploads')?c.icon:'';
+    document.getElementById('ch-icon-file').value='';
+    document.getElementById('ch-cat').value=c.category_id;
+    document.getElementById('ch-active').checked=c.active!==false;
+    document.getElementById('servers-list').innerHTML='';
+    serverCount=0;
+    (c.servers||[c.iframe]).forEach(s=>addServer(s));
+    
+    // Show preview
+    const preview=document.getElementById('ch-icon-preview');
+    if(c.icon&&c.icon.startsWith('/uploads')){
+        preview.innerHTML=`<img src="${c.icon}" style="width:100%;height:100%;object-fit:cover;border-radius:6px">`;
+    }else{
+        preview.innerHTML=c.icon||'📺';
+    }
+    
+    document.getElementById('mCh-t').textContent='Edit Channel';
+    document.getElementById('mCh').classList.add('active');
+}
+
+async function saveCh(){
+    const id=document.getElementById('ch-id').value;
+    const servers=Array.from(document.querySelectorAll('.srv-url')).map(i=>i.value).filter(v=>v);
+    
+    let icon=document.getElementById('ch-icon').value||'📺';
+    
+    // If image file selected, upload it first
+    if(chIconFile){
+        const formData=new FormData();
+        formData.append('icon',chIconFile);
+        formData.append('type','channel');
+        
+        try{
+            const uploadRes=await fetch('/api/upload-icon',{
+                method:'POST',
+                headers:{Authorization:'Bearer '+T},
+                body:formData
+            });
+            const uploadData=await uploadRes.json();
+            if(uploadData.success){
+                icon=uploadData.path;
+            }else{
+                toast('Failed to upload icon','error');
+                return;
+            }
+        }catch(e){
+            toast('Upload error','error');
+            return;
+        }
+    }else if(!icon||icon==='📺'){
+        // Keep current icon if no new one
+        const currentIcon=document.getElementById('ch-current-icon').value;
+        if(currentIcon)icon=currentIcon;
+    }
+    
+    const data={
+        name:document.getElementById('ch-name').value,
+        icon:icon,
+        category_id:parseInt(document.getElementById('ch-cat').value),
+        active:document.getElementById('ch-active').checked,
+        servers:servers,iframe:servers[0]||''
+    };
+    if(id)data.id=parseInt(id);
+    const r=await fetch('/api/channel',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify(data)});
+    const d=await r.json();
+    if(d.success){toast('✅ Saved!');closeModal('mCh');chIconFile=null;load();}
+    else toast(d.error||'Error','error');
+}
+
+async function toggleCh(id,active){
+    const c=D.channels.find(x=>x.id===id);if(!c)return;
+    c.active=active;
+    await fetch('/api/channel',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify(c)});
+    toast(active?'✅ Active':'⏸️ Inactive');
+}
+
+async function delCh(id){if(!confirm('Delete?'))return;await fetch('/api/channel/delete',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify({id})});toast('🗑️ Deleted');load();}
+
+// Category functions
+let catIconFile=null;
+
+function previewCatIcon(input){
+    if(input.files&&input.files[0]){
+        catIconFile=input.files[0];
+        const reader=new FileReader();
+        reader.onload=function(e){
+            document.getElementById('cat-icon-preview').innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover">`;
+            document.getElementById('cat-icon').value=''; // Clear emoji if image selected
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function updateCatIconPreview(){
+    const icon=document.getElementById('cat-icon').value;
+    const preview=document.getElementById('cat-icon-preview');
+    if(icon&&!catIconFile){
+        preview.innerHTML=icon;
+    }
+}
+
+function openCat(){
+    catIconFile=null;
+    document.getElementById('cat-id').value='';
+    document.getElementById('cat-current-icon').value='';
+    document.getElementById('cat-name').value='';
+    document.getElementById('cat-icon').value='🏷️';
+    document.getElementById('cat-icon-file').value='';
+    document.getElementById('cat-icon-preview').innerHTML='🏷️';
+    document.getElementById('mCat').classList.add('active');
+}
+
+function editCat(id){
+    catIconFile=null;
+    const c=D.categories.find(x=>x.id===id);
+    if(!c)return;
+    document.getElementById('cat-id').value=c.id;
+    document.getElementById('cat-current-icon').value=c.icon||'';
+    document.getElementById('cat-name').value=c.name;
+    document.getElementById('cat-icon').value=c.icon&&!c.icon.startsWith('/uploads')?c.icon:'';
+    document.getElementById('cat-icon-file').value='';
+    
+    // Show preview
+    const preview=document.getElementById('cat-icon-preview');
+    if(c.icon&&c.icon.startsWith('/uploads')){
+        preview.innerHTML=`<img src="${c.icon}" style="width:100%;height:100%;object-fit:cover">`;
+    }else{
+        preview.innerHTML=c.icon||'🏷️';
+    }
+    
+    document.getElementById('mCat').classList.add('active');
+}
+
+async function saveCat(){
+    const id=document.getElementById('cat-id').value;
+    const name=document.getElementById('cat-name').value.trim();
+    
+    if(!name){toast('Enter category name','error');return;}
+    
+    let icon=document.getElementById('cat-icon').value||'🏷️';
+    
+    // If image file selected, upload it first
+    if(catIconFile){
+        const formData=new FormData();
+        formData.append('icon',catIconFile);
+        formData.append('type','category');
+        
+        try{
+            const uploadRes=await fetch('/api/upload-icon',{
+                method:'POST',
+                headers:{Authorization:'Bearer '+T},
+                body:formData
+            });
+            const uploadData=await uploadRes.json();
+            if(uploadData.success){
+                icon=uploadData.path;
+            }else{
+                toast('Failed to upload icon','error');
+                return;
+            }
+        }catch(e){
+            toast('Upload error','error');
+            return;
+        }
+    }
+    
+    const data={name,icon};
+    if(id)data.id=parseInt(id);
+    
+    await fetch('/api/category',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify(data)});
+    toast('✅ Saved!');
+    closeModal('mCat');
+    catIconFile=null;
+    load();
+}
+
+async function delCat(id){if(!confirm('Delete?'))return;await fetch('/api/category/delete',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify({id})});toast('🗑️ Deleted');load();}
+
+// User functions
+function openUsr(){document.getElementById('usr-id').value='';document.getElementById('usr-name').value='';document.getElementById('usr-pass').value='';document.getElementById('mUsr').classList.add('active');}
+function editUsr(id){const u=D.users.find(x=>x.id===id);if(!u)return;document.getElementById('usr-id').value=u.id;document.getElementById('usr-name').value=u.username;document.getElementById('usr-pass').value='';document.getElementById('mUsr').classList.add('active');}
+async function saveUsr(){const id=document.getElementById('usr-id').value;const data={username:document.getElementById('usr-name').value,password:document.getElementById('usr-pass').value};if(id)data.id=parseInt(id);await fetch('/api/user',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify(data)});toast('✅ Saved!');closeModal('mUsr');load();}
+async function delUsr(id){if(!confirm('Delete?'))return;await fetch('/api/user/delete',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify({id})});toast('🗑️ Deleted');load();}
+
+async function delViewer(id){if(!confirm('Delete this viewer?'))return;await fetch('/api/viewer/delete',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify({id})});toast('🗑️ Deleted');load();}
+
+// Viewer Management Functions
+function openViewer(){
+    document.getElementById('mViewer-title').textContent='Add Viewer';
+    document.getElementById('viewer-id').value='';
+    document.getElementById('viewer-username').value='';
+    document.getElementById('viewer-email').value='';
+    document.getElementById('viewer-pass').value='';
+    document.getElementById('viewer-pass').placeholder='Min 6 characters';
+    document.getElementById('viewer-sub-section').style.display='none';
+    document.getElementById('mViewer').classList.add('active');
+}
+
+function editViewer(id){
+    const v=VIEWERS.find(x=>x.id===id);
+    if(!v)return;
+    document.getElementById('mViewer-title').textContent='Edit Viewer';
+    document.getElementById('viewer-id').value=v.id;
+    document.getElementById('viewer-username').value=v.username;
+    document.getElementById('viewer-email').value=v.email;
+    document.getElementById('viewer-pass').value='';
+    document.getElementById('viewer-pass').placeholder='Leave empty to keep current';
+    
+    // Show subscription section for edit
+    document.getElementById('viewer-sub-section').style.display='block';
+    const planSelect=document.getElementById('viewer-plan');
+    planSelect.innerHTML='<option value="">No subscription</option>'+
+        (D.plans||[]).map(p=>`<option value="${p.id}">${p.name} (${p.days} days)</option>`).join('');
+    if(v.subscription){
+        planSelect.value=v.subscription.plan_id||'';
+    }
+    
+    document.getElementById('mViewer').classList.add('active');
+}
+
+async function saveViewer(){
+    const id=document.getElementById('viewer-id').value;
+    const username=document.getElementById('viewer-username').value.trim();
+    const email=document.getElementById('viewer-email').value.trim().toLowerCase();
+    const password=document.getElementById('viewer-pass').value;
+    const planId=document.getElementById('viewer-plan').value;
+    
+    if(!username||username.length<3){toast('Username min 3 chars','error');return;}
+    if(!email||!email.includes('@')){toast('Invalid email','error');return;}
+    if(!id&&password.length<6){toast('Password min 6 chars','error');return;}
+    
+    const data={username,email};
+    if(password)data.password=password;
+    if(id)data.id=parseInt(id);
+    if(planId)data.plan_id=parseInt(planId);
+    
+    try{
+        const r=await fetch('/api/viewer/manage',{
+            method:'POST',
+            headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},
+            body:JSON.stringify(data)
+        });
+        const d=await r.json();
+        if(d.success){
+            toast('✅ Viewer saved!');
+            closeModal('mViewer');
+            load();
+        }else{
+            toast(d.error||'Error','error');
+        }
+    }catch(e){
+        toast('Connection error','error');
+    }
+}
+
+// Plan Management Functions
+function renderPlans(){
+    const plans=D.plans||[];
+    document.getElementById('t-plans').innerHTML=plans.map(p=>`
+        <tr>
+            <td><b>${esc(p.name)}</b></td>
+            <td>${p.days} days</td>
+            <td><span class="badge bok">$${p.price}</span></td>
+            <td>${p.original_price?'<s>$'+p.original_price+'</s>':'-'}</td>
+            <td>${p.devices||1}</td>
+            <td>${p.featured?'<span class="badge bok">⭐ Yes</span>':'No'}</td>
+            <td class="acts">
+                <button class="bi" onclick="editPlan(${p.id})">✏️</button>
+                <button class="bi danger" onclick="delPlan(${p.id})">🗑️</button>
+            </td>
+        </tr>
+    `).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--mut)">No plans. Add one!</td></tr>';
+}
+
+function openPlan(){
+    document.getElementById('mPlan-title').textContent='Add Plan';
+    document.getElementById('plan-id').value='';
+    document.getElementById('plan-name').value='';
+    document.getElementById('plan-days').value='';
+    document.getElementById('plan-devices').value='1';
+    document.getElementById('plan-price').value='';
+    document.getElementById('plan-original').value='';
+    document.getElementById('plan-featured').checked=false;
+    document.getElementById('mPlan').classList.add('active');
+}
+
+function editPlan(id){
+    const p=(D.plans||[]).find(x=>x.id===id);
+    if(!p)return;
+    document.getElementById('mPlan-title').textContent='Edit Plan';
+    document.getElementById('plan-id').value=p.id;
+    document.getElementById('plan-name').value=p.name;
+    document.getElementById('plan-days').value=p.days;
+    document.getElementById('plan-devices').value=p.devices||1;
+    document.getElementById('plan-price').value=p.price;
+    document.getElementById('plan-original').value=p.original_price||'';
+    document.getElementById('plan-featured').checked=p.featured||false;
+    document.getElementById('mPlan').classList.add('active');
+}
+
+async function savePlan(){
+    const id=document.getElementById('plan-id').value;
+    const name=document.getElementById('plan-name').value.trim();
+    const days=parseInt(document.getElementById('plan-days').value);
+    const devices=parseInt(document.getElementById('plan-devices').value)||1;
+    const price=parseFloat(document.getElementById('plan-price').value);
+    const original=parseFloat(document.getElementById('plan-original').value)||null;
+    const featured=document.getElementById('plan-featured').checked;
+    
+    if(!name){toast('Enter plan name','error');return;}
+    if(!days||days<1){toast('Enter valid days','error');return;}
+    if(!price||price<0){toast('Enter valid price','error');return;}
+    
+    const data={name,days,devices,price,featured};
+    if(original)data.original_price=original;
+    if(id)data.id=parseInt(id);
+    
+    try{
+        const r=await fetch('/api/plan',{
+            method:'POST',
+            headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},
+            body:JSON.stringify(data)
+        });
+        const d=await r.json();
+        if(d.success){
+            toast('✅ Plan saved!');
+            closeModal('mPlan');
+            load();
+        }else{
+            toast(d.error||'Error','error');
+        }
+    }catch(e){
+        toast('Connection error','error');
+    }
+}
+
+async function delPlan(id){
+    if(!confirm('Delete this plan?'))return;
+    try{
+        await fetch('/api/plan/delete',{
+            method:'POST',
+            headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},
+            body:JSON.stringify({id})
+        });
+        toast('🗑️ Plan deleted');
+        load();
+    }catch(e){
+        toast('Error','error');
+    }
+}
+
+async function saveSettings(){
+    const data={
+        site_name:document.getElementById('set-name').value,
+        paypal_app_name:document.getElementById('paypal-app').value,
+        paypal_client_id:document.getElementById('paypal-client').value,
+        require_subscription:document.getElementById('set-sub').checked,
+        m3u_auto_refresh:document.getElementById('set-refresh').checked,
+        m3u_refresh_hours:parseInt(document.getElementById('set-hours').value)||6,
+        sofascore_host:document.getElementById('sofascore-host').value,
+        smtp_host:document.getElementById('smtp-host').value,
+        smtp_port:parseInt(document.getElementById('smtp-port').value)||587,
+        smtp_user:document.getElementById('smtp-user').value,
+        smtp_from:document.getElementById('smtp-from').value,
+        smtp_tls:document.getElementById('smtp-tls').checked
+    };
+    
+    // Only send passwords/keys if they were changed (not empty)
+    const smtpPass=document.getElementById('smtp-pass').value;
+    const paypalSecret=document.getElementById('paypal-secret').value;
+    const sofascoreKey=document.getElementById('sofascore-key').value;
+    if(smtpPass)data.smtp_pass=smtpPass;
+    if(paypalSecret)data.paypal_secret=paypalSecret;
+    if(sofascoreKey)data.sofascore_key=sofascoreKey;
+    
+    console.log('Saving settings:', data);
+    try{
+        const r=await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify(data)});
+        const d=await r.json();
+        console.log('Save response:', d);
+        if(d.success){
+            toast('✅ Settings Saved!');
+        }else{
+            toast('❌ Error: '+(d.error||'Unknown'),'error');
+        }
+    }catch(e){
+        console.error('Save error:', e);
+        toast('❌ Connection error','error');
+    }
+}
+
+async function testSmtp(){
+    const email=document.getElementById('test-email').value;
+    if(!email){toast('Enter test email','error');return;}
+    const res=document.getElementById('smtp-result');
+    res.innerHTML='<span style="color:var(--mut)">⏳ Sending test email...</span>';
+    try{
+        const r=await fetch('/api/test-smtp',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:JSON.stringify({email})});
+        const d=await r.json();
+        if(d.success){
+            res.innerHTML='<span style="color:var(--ok)">✅ '+d.message+'</span>';
+        }else{
+            res.innerHTML='<span style="color:var(--err)">❌ '+d.error+'</span>';
+        }
+    }catch(e){
+        res.innerHTML='<span style="color:var(--err)">❌ Connection error</span>';
+    }
+}
+
+function loadSmtpSettings(s){
+    document.getElementById('smtp-host').value=s.smtp_host||'';
+    document.getElementById('smtp-port').value=s.smtp_port||587;
+    document.getElementById('smtp-user').value=s.smtp_user||'';
+    document.getElementById('smtp-pass').value='';
+    document.getElementById('smtp-pass').placeholder=s.smtp_pass?'••••••••••••••• (saved)':'Enter password';
+    document.getElementById('smtp-from').value=s.smtp_from||'';
+    document.getElementById('smtp-tls').checked=s.smtp_tls!==false;
+    // PayPal
+    document.getElementById('paypal-app').value=s.paypal_app_name||'';
+    document.getElementById('paypal-client').value=s.paypal_client_id||'';
+    document.getElementById('paypal-secret').value='';
+    document.getElementById('paypal-secret').placeholder=s.paypal_secret?'••••••••••••••• (saved)':'Enter secret';
+    // SofaScore
+    document.getElementById('sofascore-host').value=s.sofascore_host||'sportapi7.p.rapidapi.com';
+    document.getElementById('sofascore-key').value='';
+    document.getElementById('sofascore-key').placeholder=s.sofascore_key?'••••••••••••••• (saved)':'Enter RapidAPI Key';
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('active');}
+function logout(){localStorage.removeItem('zt');location.href='/admin';}
+function toast(m,t='success'){const e=document.getElementById('toast');e.textContent=m;e.className='toast show '+t;setTimeout(()=>e.classList.remove('show'),3000);}
+function esc(s){return String(s||'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'})[c]);}
+
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('active');}));
+load();
+</script>
+</body></html>

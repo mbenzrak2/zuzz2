@@ -1,0 +1,70 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+      "role": "admin",
+      "created": "2025-01-01"
+    }
+  ],
+  "sessions": {
+    "a9e47c0b3107c9f1bf0dab8d86f4cb4bfbd5e230c4f38dcd009dadf2c0adec14": {
+      "user_id": 1,
+      "username": "admin",
+      "role": "admin",
+      "created": "2026-02-13T23:37:35.715823",
+      "ip": "127.0.0.1"
+    }
+  },
+  "categories": [
+    {
+      "id": 1,
+      "name": "CHANNELS",
+      "icon": "📺"
+    }
+  ],
+  "channels": [],
+  "viewers": [],
+  "viewer_sessions": {},
+  "subscriptions": [],
+  "plans": [
+    {
+      "id": 1,
+      "name": "Weekly",
+      "price": 14.99,
+      "days": 7,
+      "devices": 1
+    },
+    {
+      "id": 2,
+      "name": "Monthly",
+      "price": 19.99,
+      "days": 30,
+      "devices": 1
+    },
+    {
+      "id": 3,
+      "name": "Annual",
+      "price": 99.99,
+      "days": 365,
+      "devices": 2,
+      "featured": true
+    }
+  ],
+  "settings": {
+    "site_name": "VIVV TV",
+    "m3u_auto_refresh": true,
+    "m3u_refresh_hours": 6,
+    "require_subscription": false,
+    "paypal_client_id": "",
+    "paypal_app_name": "",
+    "sofascore_host": "sportapi7.p.rapidapi.com",
+    "smtp_host": "",
+    "smtp_port": 587,
+    "smtp_user": "",
+    "smtp_from": "",
+    "smtp_tls": true,
+    "sofascore_key": "7f5e255237mshc0968eb6c25d037p180b5bjsn0481d36b3a12"
+  }
+}

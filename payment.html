@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Subscribe - ZUZZ TV</title>
+<link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#ff5722">
+<style>
+:root{--p:#ff5722;--bg:#0d1117;--card:#161b22;--bdr:#30363d;--txt:#f0f6fc;--mut:#8b949e;--ok:#3fb950}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui;background:var(--bg);color:var(--txt);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.box{background:var(--card);border:1px solid var(--bdr);border-radius:20px;padding:40px;width:100%;max-width:450px}
+.logo{text-align:center;margin-bottom:30px}
+.logo h1{font-size:28px;background:linear-gradient(135deg,#ff5722,#ff9800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo p{color:var(--mut);font-size:13px;margin-top:5px}
+
+.plan-card{background:var(--bg);border:2px solid var(--p);border-radius:12px;padding:25px;margin-bottom:25px;position:relative}
+.plan-card.featured::before{content:'BEST VALUE';position:absolute;top:-12px;right:15px;background:var(--p);color:#fff;padding:4px 12px;border-radius:4px;font-size:10px;font-weight:700}
+.plan-name{font-size:22px;font-weight:700;margin-bottom:5px}
+.plan-duration{color:var(--mut);font-size:13px;margin-bottom:15px}
+.plan-price{display:flex;align-items:baseline;gap:5px;margin-bottom:15px}
+.plan-price .amount{font-size:42px;font-weight:800}
+.plan-price .cents{font-size:18px;font-weight:600}
+.plan-price .old{color:var(--mut);text-decoration:line-through;font-size:16px;margin-left:10px}
+.plan-features{list-style:none}
+.plan-features li{padding:8px 0;color:var(--mut);font-size:13px;display:flex;align-items:center;gap:8px}
+.plan-features li::before{content:'✓';color:var(--ok);font-weight:bold}
+
+.divider{display:flex;align-items:center;margin:25px 0;color:var(--mut);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.divider span{padding:0 15px}
+
+#paypal-button-container{min-height:45px}
+.loading{text-align:center;padding:20px;color:var(--mut)}
+
+.secure-badge{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;color:var(--mut);font-size:12px}
+
+.success-box{display:none;text-align:center}
+.success-box.show{display:block}
+.success-icon{font-size:60px;margin-bottom:15px}
+.success-box h2{color:var(--ok);margin-bottom:10px}
+.success-box p{color:var(--mut);margin-bottom:20px}
+.btn{display:block;padding:14px;background:linear-gradient(135deg,#ff5722,#ff9800);color:#fff;text-decoration:none;border-radius:8px;font-weight:600;text-align:center}
+
+.error-msg{background:rgba(248,81,73,.1);border:1px solid #f85149;color:#f85149;padding:12px;border-radius:8px;margin-bottom:20px;font-size:13px;display:none}
+.error-msg.show{display:block}
+
+.back-link{display:block;text-align:center;margin-top:20px;color:var(--p);text-decoration:none;font-size:13px}
+</style>
+</head>
+<body>
+<div class="box">
+<!-- Payment Form -->
+<div id="payment-form">
+<div class="logo">
+<h1>ZUZZ TV</h1>
+<p>Complete your subscription</p>
+</div>
+
+<div class="error-msg" id="error-msg"></div>
+
+<div class="plan-card" id="plan-card">
+<div class="plan-name" id="plan-name">Loading...</div>
+<div class="plan-duration" id="plan-duration">-</div>
+<div class="plan-price">
+<span class="amount" id="plan-amount">$0</span>
+<span class="cents" id="plan-cents">.00</span>
+<span class="old" id="plan-old" style="display:none"></span>
+</div>
+<ul class="plan-features">
+<li>Unlimited Live Channels</li>
+<li>No Blackouts</li>
+<li>All Sports Included</li>
+<li>Instant Activation</li>
+</ul>
+</div>
+
+<div class="divider"><span>Pay securely with</span></div>
+
+<div id="paypal-button-container">
+<div class="loading">Loading PayPal...</div>
+</div>
+
+<div class="secure-badge">
+🔒 Secure payment powered by PayPal
+</div>
+
+<a href="/" class="back-link">← Back to channels</a>
+</div>
+
+<!-- Success Message -->
+<div class="success-box" id="success-box">
+<div class="success-icon">🎉</div>
+<h2>Payment Successful!</h2>
+<p>Your subscription is now active. Enjoy unlimited streaming!</p>
+<div id="sub-details" style="background:var(--bg);border-radius:8px;padding:15px;margin-bottom:20px;text-align:left">
+<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--mut)">Plan:</span><span id="success-plan">-</span></div>
+<div style="display:flex;justify-content:space-between"><span style="color:var(--mut)">Expires:</span><span id="success-expires">-</span></div>
+</div>
+<a href="/" class="btn">📺 Start Watching Now</a>
+</div>
+</div>
+
+<script src="https://www.paypal.com/sdk/js?client-id=CLIENT_ID&currency=USD" id="paypal-sdk"></script>
+<script>
+let PLAN = null;
+let PAYPAL_CLIENT_ID = '';
+
+// Get plan from URL
+const params = new URLSearchParams(window.location.search);
+const planId = parseInt(params.get('plan'));
+
+if(!planId){
+    showError('No plan selected');
+}
+
+// Check if logged in
+const token = localStorage.getItem('vt');
+if(!token){
+    window.location.href = '/login?redirect=/payment?plan=' + planId;
+}
+
+// Load plan details
+async function loadPlan(){
+    try{
+        const r = await fetch('/api/plans');
+        const data = await r.json();
+        PAYPAL_CLIENT_ID = data.paypal_client_id;
+        
+        PLAN = (data.plans || []).find(p => p.id === planId);
+        if(!PLAN){
+            showError('Plan not found');
+            return;
+        }
+        
+        // Update UI
+        document.getElementById('plan-name').textContent = PLAN.name;
+        document.getElementById('plan-duration').textContent = PLAN.days + ' days • ' + (PLAN.devices || 1) + ' device' + ((PLAN.devices || 1) > 1 ? 's' : '');
+        
+        const price = PLAN.price;
+        const whole = Math.floor(price);
+        const cents = Math.round((price - whole) * 100);
+        document.getElementById('plan-amount').textContent = '$' + whole;
+        document.getElementById('plan-cents').textContent = '.' + (cents < 10 ? '0' : '') + cents;
+        
+        if(PLAN.original_price && PLAN.original_price > price){
+            document.getElementById('plan-old').textContent = '$' + PLAN.original_price;
+            document.getElementById('plan-old').style.display = 'inline';
+        }
+        
+        if(PLAN.featured){
+            document.getElementById('plan-card').classList.add('featured');
+        }
+        
+        // Load PayPal with correct client ID
+        loadPayPal();
+    }catch(e){
+        console.error(e);
+        showError('Failed to load plan details');
+    }
+}
+
+function loadPayPal(){
+    if(!PAYPAL_CLIENT_ID){
+        document.getElementById('paypal-button-container').innerHTML = '<p style="color:#f85149;text-align:center">PayPal not configured. Please contact admin.</p>';
+        return;
+    }
+    
+    // Update PayPal SDK script
+    const script = document.createElement('script');
+    script.src = 'https://www.paypal.com/sdk/js?client-id=' + PAYPAL_CLIENT_ID + '&currency=USD';
+    script.onload = initPayPal;
+    script.onerror = () => {
+        document.getElementById('paypal-button-container').innerHTML = '<p style="color:#f85149;text-align:center">Failed to load PayPal</p>';
+    };
+    document.head.appendChild(script);
+}
+
+function initPayPal(){
+    document.getElementById('paypal-button-container').innerHTML = '';
+    
+    paypal.Buttons({
+        style: {
+            layout: 'vertical',
+            color: 'gold',
+            shape: 'rect',
+            label: 'subscribe'
+        },
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    description: 'ZUZZ TV - ' + PLAN.name,
+                    amount: {
+                        value: PLAN.price.toFixed(2)
+                    }
+                }]
+            });
+        },
+        onApprove: async function(data, actions) {
+            // Capture the order
+            const order = await actions.order.capture();
+            console.log('Payment successful:', order);
+            
+            // Send to our server to activate subscription
+            try{
+                const r = await fetch('/api/subscribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        plan_id: PLAN.id,
+                        paypal_order_id: order.id
+                    })
+                });
+                const result = await r.json();
+                
+                if(result.success){
+                    // Update local storage
+                    localStorage.setItem('vsub', JSON.stringify(result.subscription));
+                    
+                    // Show success
+                    document.getElementById('payment-form').style.display = 'none';
+                    document.getElementById('success-box').classList.add('show');
+                    document.getElementById('success-plan').textContent = PLAN.name;
+                    document.getElementById('success-expires').textContent = new Date(result.subscription.expires).toLocaleDateString();
+                }else{
+                    showError(result.error || 'Failed to activate subscription');
+                }
+            }catch(e){
+                console.error(e);
+                showError('Failed to activate subscription. Please contact support.');
+            }
+        },
+        onError: function(err) {
+            console.error('PayPal error:', err);
+            showError('Payment failed. Please try again.');
+        },
+        onCancel: function() {
+            showError('Payment cancelled');
+        }
+    }).render('#paypal-button-container');
+}
+
+function showError(msg){
+    const el = document.getElementById('error-msg');
+    el.textContent = msg;
+    el.classList.add('show');
+}
+
+// Remove initial script tag and load plan
+document.getElementById('paypal-sdk')?.remove();
+loadPlan();
+</script>
+</body>
+</html>

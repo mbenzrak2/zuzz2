@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZUZZ TV - Live Sports & Channels</title>
+<link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#ff5722">
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<style>
+:root{--p:#ff5722;--bg:#0a1628;--card:#0f1f3a;--hov:#162d50;--bdr:#1e3a5f;--txt:#f0f6fc;--mut:#8b949e;--ok:#3fb950}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:system-ui;background:var(--bg);color:var(--txt);display:flex;flex-direction:column}
+
+/* Header */
+.header{display:flex;align-items:center;justify-content:space-between;padding:15px 30px;background:var(--card);border-bottom:1px solid var(--bdr)}
+.logo{font-size:28px;font-weight:800;color:var(--p)}
+.logo span{color:var(--txt);font-size:14px;margin-left:5px;background:var(--p);padding:2px 8px;border-radius:4px}
+.header-center{display:flex;align-items:center;gap:15px}
+.timezone{display:flex;align-items:center;gap:8px;color:var(--mut);font-size:13px}
+.time{background:var(--hov);padding:8px 15px;border-radius:20px;font-weight:600;font-size:16px}
+.header-right{display:flex;align-items:center;gap:20px}
+.header-link{color:var(--mut);text-decoration:none;font-size:13px}
+.header-link:hover{color:var(--txt)}
+.btn-account{background:var(--p);color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px}
+
+/* Sports Nav */
+.sports-nav{display:flex;align-items:center;gap:0;background:var(--card);border-bottom:3px solid var(--p);overflow-x:auto}
+.sport-tab{display:flex;align-items:center;gap:8px;padding:15px 25px;color:var(--mut);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-3px;white-space:nowrap;font-size:13px;font-weight:500}
+.sport-tab:hover{background:var(--hov);color:var(--txt)}
+.sport-tab.active{color:var(--p);border-bottom-color:var(--p);background:rgba(255,87,34,.1)}
+.sport-tab img{width:20px;height:20px}
+
+/* Main Layout */
+.main{display:flex;flex:1;min-height:0}
+
+/* Sidebar */
+.sidebar{width:400px;background:var(--card);border-right:1px solid var(--bdr);overflow-y:auto}
+.event-item{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--bdr);cursor:pointer}
+.event-item:hover{background:var(--hov)}
+.event-item.active{background:var(--hov);border-left:3px solid var(--p)}
+.event-left{display:flex;align-items:center;gap:12px}
+.event-logo{width:30px;height:30px;object-fit:contain}
+.event-name{font-weight:600;font-size:14px}
+.btn-watch{background:var(--p);color:#fff;padding:6px 15px;border-radius:4px;font-size:12px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:5px}
+.btn-watch:hover{opacity:.9}
+
+/* Date Header */
+.date-header{padding:12px 20px;color:var(--p);font-size:13px;font-weight:600;background:rgba(255,87,34,.05);border-bottom:1px solid var(--bdr)}
+
+/* Scheduled Item */
+.scheduled-item{display:flex;flex-direction:column;padding:15px 20px;border-bottom:1px solid var(--bdr);cursor:pointer}
+.scheduled-item:hover{background:var(--hov)}
+.scheduled-time{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.scheduled-dot{width:8px;height:8px;background:var(--p);border-radius:50%}
+.scheduled-label{color:var(--mut);font-size:11px}
+.scheduled-hour{color:var(--txt);font-weight:600;font-size:13px}
+.scheduled-teams{display:flex;flex-direction:column;gap:8px}
+.scheduled-team{display:flex;align-items:center;gap:10px}
+.scheduled-team img{width:20px;height:20px;object-fit:contain}
+.scheduled-team span{font-size:13px}
+
+/* Sidebar LIVE item */
+.scheduled-item.is-live{background:rgba(248,81,73,0.1);border-left:3px solid #f85149}
+.btn-watch-small{margin-left:auto;background:#f85149;color:#fff;padding:4px 12px;border-radius:4px;font-size:11px;font-weight:600;text-decoration:none}
+.btn-watch-small:hover{background:#ff6b6b}
+
+/* No Events */
+.no-events{padding:40px 20px;text-align:center}
+.no-events h3{color:var(--p);font-size:16px;margin-bottom:8px}
+.no-events p{color:var(--mut);font-size:13px}
+
+/* Content - Featured Match */
+.content{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;background:linear-gradient(180deg,var(--bg) 0%,#0d1e36 100%)}
+.content.playing{padding:0;align-items:stretch;justify-content:stretch}
+.featured-match{text-align:center;max-width:800px;width:100%;display:flex;flex-direction:column;align-items:center}
+.content.playing .featured-match{max-width:none;width:100%;height:100%;text-align:left;display:flex;flex-direction:column;flex:1}
+
+/* League Badge */
+.league-badge{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:30px}
+.league-badge img{width:28px;height:28px;object-fit:contain}
+.league-badge span{font-size:16px;font-weight:700}
+
+/* Teams Display */
+.teams-display{display:flex;align-items:center;justify-content:center;gap:40px;margin-bottom:30px}
+.team-card{text-align:center;min-width:100px}
+.team-logo{width:100px;height:100px;object-fit:contain;margin-bottom:12px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.3))}
+.team-name{font-size:16px;font-weight:600}
+
+/* Countdown Badge */
+.countdown-badge{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,87,34,.1);border:2px solid var(--p);color:var(--p);padding:10px 25px;border-radius:8px;font-size:16px;font-weight:700;min-width:80px}
+
+/* Match DateTime */
+.match-datetime{background:var(--card);padding:12px 25px;border-radius:8px;font-size:14px;margin-top:15px}
+.match-datetime strong{font-size:18px}
+
+/* LIVE Match Display */
+.live-indicator{display:flex;align-items:center;justify-content:center;gap:12px;margin:20px 0;font-size:24px;font-weight:700;color:#f85149}
+.live-pulse{width:14px;height:14px;background:#f85149;border-radius:50%;animation:livePulse 1.5s infinite}
+@keyframes livePulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:0.6}}
+.live-match-info{font-size:20px;font-weight:600;margin:15px 0 25px;color:var(--txt);text-align:center}
+.btn-watch-live{background:linear-gradient(135deg,#f85149,#ff6b6b);color:#fff;border:none;padding:16px 40px;font-size:16px;font-weight:700;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 20px rgba(248,81,73,0.4);transition:all 0.3s;margin-top:10px}
+.btn-watch-live:hover{transform:scale(1.05);box-shadow:0 6px 30px rgba(248,81,73,0.6)}
+
+/* Video Player Inline - FULL SIZE */
+/* Video Player Inline - FULL SIZE */
+.video-player-wrap{width:100%;height:100%;display:flex;flex-direction:column;background:#000;flex:1}
+.video-header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:rgba(15,31,58,.95);border-bottom:1px solid var(--bdr);flex-shrink:0}
+.video-title{display:flex;align-items:center;gap:10px}
+.live-badge{background:#f85149;color:#fff;padding:4px 12px;border-radius:4px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px}
+.live-badge::before{content:'';width:6px;height:6px;background:#fff;border-radius:50%;animation:pulse 1s infinite}
+.video-name{font-weight:600;font-size:16px;color:#fff}
+.video-controls{display:flex;gap:8px;align-items:center}
+.srv-btn{padding:8px 15px;background:var(--hov);border:1px solid var(--bdr);border-radius:6px;color:#fff;cursor:pointer;font-size:12px;font-weight:500}
+.srv-btn:hover{background:var(--bdr)}
+.srv-btn.active{background:var(--p);border-color:var(--p)}
+.back-btn{display:flex;align-items:center;gap:5px;color:#fff;background:transparent;padding:8px 15px;border-radius:6px;cursor:pointer;font-size:13px;border:1px solid var(--bdr);margin-right:15px}
+.back-btn:hover{background:var(--hov)}
+.video-container{flex:1;position:relative;background:#000;width:100%}
+.video-container video,.video-container iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+
+/* Footer */
+.footer{background:var(--card);border-top:1px solid var(--bdr);padding:20px 30px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px;flex-shrink:0}
+.content.playing ~ .footer,.playing-mode .footer{display:none}
+.footer-left{font-size:12px;color:var(--mut)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{color:var(--p);text-decoration:none;font-size:12px}
+.footer-right{display:flex;align-items:center;gap:10px}
+.footer-logo{font-size:20px;font-weight:800;color:var(--p)}
+.footer-slogan{color:var(--mut);font-size:12px}
+
+/* Responsive */
+@media(max-width:900px){
+.main{flex-direction:column}
+.sidebar{width:100%;max-height:45vh;flex-shrink:0;overflow-y:auto}
+.main.playing-mode .sidebar{display:none}
+.content{flex:1;padding:20px;min-height:200px}
+.content.playing{padding:0}
+.teams-display{gap:20px;flex-wrap:wrap}
+.team-card{min-width:80px}
+.team-logo{width:70px;height:70px}
+.team-name{font-size:14px}
+.header{padding:10px 15px;flex-wrap:wrap}
+.sports-nav{padding:0 10px;overflow-x:auto}
+.sport-tab{padding:10px 12px;font-size:11px;white-space:nowrap}
+.league-badge{margin-bottom:20px}
+.league-badge span{font-size:14px}
+.countdown-badge{padding:10px 20px;font-size:14px}
+.live-indicator{font-size:20px;margin:15px 0}
+.live-match-info{font-size:16px}
+.btn-watch-live{padding:14px 30px;font-size:14px}
+.match-datetime{padding:12px 20px;font-size:14px}
+.match-datetime strong{font-size:16px}
+.video-header{padding:8px 12px;flex-wrap:wrap;gap:10px}
+.video-title{flex-wrap:wrap}
+.video-name{font-size:13px}
+.back-btn{padding:6px 10px;font-size:12px;margin-right:8px}
+.scheduled-item{padding:10px 15px}
+.scheduled-team{gap:6px}
+.scheduled-team img{width:18px;height:18px}
+.scheduled-team span{font-size:12px}
+}
+
+@media(max-width:480px){
+.header{gap:10px}
+.header-center{display:none}
+.logo{font-size:22px}
+.teams-display{gap:15px}
+.team-logo{width:60px;height:60px}
+.team-name{font-size:12px}
+.sidebar{max-height:200px}
+.scheduled-item{padding:10px}
+.scheduled-team img{width:16px;height:16px}
+.scheduled-team span{font-size:11px}
+.btn-watch-small{padding:3px 8px;font-size:10px}
+}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+</style></head>
+<body>
+
+<!-- Header -->
+<header class="header">
+<div class="logo">ZUZZ<span>TV</span></div>
+<div class="header-center">
+<div class="timezone">🕐 GMT+1 ▾</div>
+<div class="time" id="current-time">00:00</div>
+</div>
+<div class="header-right">
+<a href="/why-zuzz" class="header-link">Why zuzz?</a>
+<a href="/faq" class="header-link">ⓘ FAQ</a>
+<div class="user-menu" id="user-menu" style="display:none">
+<button class="btn-account" onclick="toggleUserDropdown()"><span id="user-name">User</span> ▾</button>
+<div class="user-dropdown" id="user-dropdown">
+<div class="user-info" id="user-info"></div>
+<a href="#" onclick="logout()">🚪 Logout</a>
+</div>
+</div>
+<a href="/login" class="btn-account" id="login-btn">My Account</a>
+</div>
+</header>
+
+<style>
+.user-menu{position:relative}
+.user-dropdown{display:none;position:absolute;top:100%;right:0;background:var(--card);border:1px solid var(--bdr);border-radius:8px;min-width:200px;margin-top:10px;z-index:100;overflow:hidden}
+.user-dropdown.show{display:block}
+.user-dropdown a{display:block;padding:12px 15px;color:var(--txt);text-decoration:none;font-size:13px;border-top:1px solid var(--bdr)}
+.user-dropdown a:hover{background:var(--hov)}
+.user-info{padding:15px;border-bottom:1px solid var(--bdr)}
+.user-info .name{font-weight:600;margin-bottom:5px}
+.user-info .sub{font-size:12px;color:var(--ok)}
+.user-info .no-sub{font-size:12px;color:var(--mut)}
+</style>
+
+<!-- Sports Navigation - Loaded from API -->
+<nav class="sports-nav" id="sports-nav">
+<div class="sport-tab active" data-cat="0" onclick="selectSport(0,this)">📺 CHANNELS</div>
+<!-- Categories will be loaded here -->
+</nav>
+
+<!-- Main Content -->
+<div class="main">
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+<div class="no-events"><h3>Loading...</h3><p>Please wait</p></div>
+</aside>
+
+<!-- Featured Match -->
+<section class="content" id="featured-content">
+<div class="featured-match" id="featured-match">
+<p style="color:var(--mut)">Select a match or channel</p>
+</div>
+</section>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+<div class="footer-left" id="footer-copyright">COPYRIGHT © 2019-2025 - ZUZZ TV</div>
+<div class="footer-links">
+<a href="/terms">Terms And Conditions</a>
+<a href="/privacy">Privacy Policy</a>
+<a href="/affiliates">Affiliates</a>
+<a href="/contact">Contact Us</a>
+</div>
+<div class="footer-right">
+<span class="footer-logo" id="footer-logo">ZUZZ<span style="font-size:12px;color:var(--mut)">TV</span></span>
+<span class="footer-slogan">Watch For LESS!</span>
+</div>
+</footer>
+
+<!-- Payment Modal -->
+<div class="modal" id="paymentModal">
+<div class="modal-content">
+<div class="modal-header">
+<span class="modal-live">● <span id="modal-channel-name">Channel</span></span>
+<button class="modal-close" onclick="closePaymentModal()">×</button>
+</div>
+<div class="modal-body">
+<h2>Select a plan</h2>
+<p class="modal-desc">Watch Unlimited BOXING, MMA (PPV INCLUDED), NFL, NCAAF, NCAAB, Rodeo, MLB, NHL, NBA No Blackouts. Instant activation!</p>
+<div class="plans-list" id="plans-list">
+<!-- Plans loaded dynamically -->
+</div>
+<p class="modal-note">Our subscriptions do not auto-renew. You will need to renew manually if you wish to continue.</p>
+</div>
+</div>
+</div>
+
+<style>
+/* Payment Modal */
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center}
+.modal.active{display:flex}
+.modal-content{background:var(--card);border-radius:12px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto;border:1px solid var(--bdr)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;border-bottom:1px solid var(--bdr)}
+.modal-live{color:var(--p);font-weight:600;display:flex;align-items:center;gap:8px}
+.modal-close{background:none;border:none;color:var(--mut);font-size:24px;cursor:pointer}
+.modal-close:hover{color:var(--txt)}
+.modal-body{padding:25px}
+.modal-body h2{margin-bottom:10px;font-size:22px}
+.modal-desc{color:var(--mut);font-size:13px;margin-bottom:25px;line-height:1.5}
+.modal-note{color:var(--mut);font-size:11px;margin-top:20px;text-align:center}
+
+/* Plans */
+.plans-list{display:flex;flex-direction:column;gap:12px}
+.plan-item{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;background:var(--bg);border:2px solid var(--bdr);border-radius:10px;cursor:pointer;transition:all .2s}
+.plan-item:hover{border-color:var(--p);background:var(--hov)}
+.plan-item.featured{border-color:var(--p);background:rgba(255,87,34,.1);position:relative}
+.plan-item.featured::after{content:'BEST VALUE';position:absolute;top:-10px;right:15px;background:var(--p);color:#fff;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:600}
+.plan-info h3{font-size:16px;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+.plan-info h3 span{color:var(--mut);font-size:13px;font-weight:400}
+.plan-info p{color:var(--mut);font-size:12px}
+.plan-price{text-align:right}
+.plan-price .old{color:var(--mut);text-decoration:line-through;font-size:14px}
+.plan-price .current{font-size:28px;font-weight:700}
+.plan-price .current sup{font-size:14px}
+.plan-price .discount{background:var(--p);color:#fff;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-top:5px;display:inline-block}
+</style>
+
+<script>
+let DATA={channels:[],categories:[]};
+let MATCHES=[];
+let selectedMatch=null;
+let currentCatId=0; // 0 = all channels
+
+// Update time
+function updateTime(){
+    const now=new Date();
+    document.getElementById('current-time').textContent=now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+setInterval(updateTime,1000);
+updateTime();
+
+// Check login and load user profile
+const vt=localStorage.getItem('vt');
+const vu=localStorage.getItem('vu');
+
+async function checkLogin(){
+    if(vt&&vu){
+        // Show user menu, hide login button
+        document.getElementById('login-btn').style.display='none';
+        document.getElementById('user-menu').style.display='block';
+        document.getElementById('user-name').textContent=vu;
+        
+        // Load fresh profile data
+        try{
+            const r=await fetch('/api/viewer/profile',{headers:{Authorization:'Bearer '+vt}});
+            const d=await r.json();
+            if(d.success){
+                const v=d.viewer;
+                let subHtml='';
+                if(v.subscription){
+                    localStorage.setItem('vsub',JSON.stringify(v.subscription));
+                    subHtml=`<div class="sub">✅ ${v.subscription.plan_name}<br>${v.subscription.days_left} days left</div>`;
+                }else{
+                    localStorage.removeItem('vsub');
+                    subHtml=`<div class="no-sub">No active subscription</div>`;
+                }
+                document.getElementById('user-info').innerHTML=`
+                    <div class="name">👤 ${esc(v.username)}</div>
+                    ${subHtml}
+                `;
+            }else{
+                // Token invalid, logout
+                logout();
+            }
+        }catch(e){console.log(e);}
+    }else{
+        // Not logged in
+        document.getElementById('login-btn').style.display='block';
+        document.getElementById('user-menu').style.display='none';
+    }
+}
+
+function toggleUserDropdown(){
+    document.getElementById('user-dropdown').classList.toggle('show');
+}
+
+function logout(){
+    // Call logout API
+    fetch('/api/viewer/logout',{method:'POST',headers:{Authorization:'Bearer '+vt}}).catch(e=>{});
+    // Clear local storage
+    localStorage.removeItem('vt');
+    localStorage.removeItem('vu');
+    localStorage.removeItem('vid');
+    localStorage.removeItem('vsub');
+    // Refresh page
+    location.reload();
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click',e=>{
+    if(!e.target.closest('.user-menu')){
+        document.getElementById('user-dropdown')?.classList.remove('show');
+    }
+});
+
+checkLogin();
+
+// Load data
+async function loadData(){
+    try{
+        const r=await fetch('/api/data');
+        DATA=await r.json();
+        
+        // Update site name from settings
+        const siteName = DATA.settings?.site_name || 'ZUZZ TV';
+        const logoEl = document.querySelector('.logo');
+        if(logoEl){
+            const parts = siteName.split(' ');
+            if(parts.length >= 2){
+                logoEl.innerHTML = parts[0] + '<span>' + parts.slice(1).join(' ') + '</span>';
+            } else {
+                logoEl.innerHTML = siteName;
+            }
+        }
+        document.title = siteName + ' - Live Sports & Channels';
+        
+        // Update footer
+        const footerCopyright = document.getElementById('footer-copyright');
+        if(footerCopyright) footerCopyright.textContent = 'COPYRIGHT © 2019-2025 - ' + siteName;
+        const footerLogo = document.getElementById('footer-logo');
+        if(footerLogo){
+            const parts = siteName.split(' ');
+            if(parts.length >= 2){
+                footerLogo.innerHTML = parts[0] + '<span style="font-size:12px;color:var(--mut)">' + parts.slice(1).join(' ') + '</span>';
+            } else {
+                footerLogo.textContent = siteName;
+            }
+        }
+        
+        // Set first category as default
+        if(DATA.categories&&DATA.categories.length>0&&currentCatId===0){
+            currentCatId=DATA.categories[0].id;
+        }
+        
+        renderSportsNav(); // Render categories in nav
+    }catch(e){console.log('Data error',e);}
+    
+    try{
+        const r=await fetch('/api/matches');
+        const d=await r.json();
+        MATCHES=(d.matches||[]).filter(m=>m.active!==false);
+    }catch(e){console.log('Matches error',e);}
+    
+    renderSidebar();
+    
+    // Show default message instead of auto-selecting
+    if(!selectedMatch){
+        document.getElementById('featured-match').innerHTML='<p style="color:var(--mut)">Select a match or channel</p>';
+    }
+}
+
+// Render categories in sports nav
+function renderSportsNav(){
+    const nav=document.getElementById('sports-nav');
+    let html='';
+    
+    // All categories from database (including CHANNELS)
+    (DATA.categories||[]).forEach(cat=>{
+        const iconHtml=cat.icon&&cat.icon.startsWith('/uploads')
+            ?`<img src="${cat.icon}" style="width:20px;height:20px;border-radius:4px;object-fit:cover;vertical-align:middle">`
+            :(cat.icon||'🏷️');
+        html+=`<div class="sport-tab ${currentCatId===cat.id?'active':''}" data-cat="${cat.id}" onclick="selectSport(${cat.id},this)">${iconHtml} ${esc(cat.name)}</div>`;
+    });
+    
+    // If no categories, show default
+    if(!html){
+        html=`<div class="sport-tab active" data-cat="0" onclick="selectSport(0,this)">📺 CHANNELS</div>`;
+    }
+    
+    nav.innerHTML=html;
+}
+
+function renderSidebar(){
+    const sidebar=document.getElementById('sidebar');
+    const now=new Date();
+    let html='';
+    
+    // Filter channels by selected category
+    let channels=(DATA.channels||[]).filter(c=>c.active!==false);
+    if(currentCatId>0){
+        channels=channels.filter(c=>c.category_id===currentCatId);
+    }
+    
+    // Show channels
+    channels.forEach(c=>{
+        // Check if icon is image path or emoji
+        const iconHtml = c.icon && c.icon.startsWith('/uploads') 
+            ? `<img src="${c.icon}" style="width:28px;height:28px;object-fit:contain;border-radius:4px" onerror="this.outerHTML='📺'">`
+            : `<span style="font-size:24px">${c.icon||'📺'}</span>`;
+        
+        html+=`<div class="event-item" onclick="playChannel(${c.id})">
+            <div class="event-left">
+                ${iconHtml}
+                <span class="event-name">${esc(c.name)}</span>
+            </div>
+            <a href="#" class="btn-watch" onclick="event.stopPropagation();playChannel(${c.id})">Watch ›</a>
+        </div>`;
+    });
+    
+    // Filter matches by selected category
+    let filteredMatches=MATCHES;
+    if(currentCatId>0){
+        filteredMatches=MATCHES.filter(m=>m.category_id===currentCatId);
+    }
+    
+    // Group matches by date
+    const matchesByDate={};
+    filteredMatches.forEach(m=>{
+        const dt=new Date(m.match_datetime);
+        const dateKey=dt.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+        if(!matchesByDate[dateKey])matchesByDate[dateKey]=[];
+        matchesByDate[dateKey].push(m);
+    });
+    
+    // Render matches
+    for(const[date,matches]of Object.entries(matchesByDate)){
+        html+=`<div class="date-header">${date}</div>`;
+        
+        matches.forEach(m=>{
+            const dt=new Date(m.match_datetime);
+            const diff=dt-now;
+            const isLive=diff<=0&&diff>-4*60*60*1000; // LIVE for 4 hours
+            const isEnded=diff<=-4*60*60*1000;
+            
+            html+=`<div class="scheduled-item ${selectedMatch?.id===m.id?'active':''} ${isLive?'is-live':''}" onclick="selectMatch(MATCHES.find(x=>x.id===${m.id}))">
+                <div class="scheduled-time">
+                    <span class="scheduled-dot" style="${isLive?'background:#f85149;animation:pulse 1s infinite':''}"></span>
+                    <span class="scheduled-label">${isLive?'🔴 LIVE':isEnded?'Ended':'Scheduled'}</span>
+                    <span class="scheduled-hour">${dt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>
+                    ${isLive&&m.stream_url?`<a href="#" class="btn-watch-small" onclick="event.stopPropagation();watchMatch(${m.id})">▶ Watch</a>`:''}
+                </div>
+                <div class="scheduled-teams">
+                    <div class="scheduled-team">
+                        <img src="${m.logo1||'/icon-192.png'}" referrerpolicy="no-referrer" onerror="this.src='/icon-192.png'">
+                        <span>${esc(m.team1)}</span>
+                    </div>
+                    <div class="scheduled-team">
+                        <img src="${m.logo2||'/icon-192.png'}" referrerpolicy="no-referrer" onerror="this.src='/icon-192.png'">
+                        <span>${esc(m.team2)}</span>
+                    </div>
+                </div>
+            </div>`;
+        });
+    }
+    
+    if(!html){
+        html=`<div class="no-events">
+            <h3>There are no events today</h3>
+            <p>Check back later or pick another sport</p>
+        </div>`;
+    }
+    
+    sidebar.innerHTML=html;
+}
+
+function selectMatch(m){
+    if(!m)return;
+    selectedMatch=m;
+    renderSidebar(); // Re-render to highlight selected
+    
+    const now=new Date();
+    const dt=new Date(m.match_datetime);
+    const diff=dt-now;
+    
+    // Match is LIVE if: started (diff<=0) and within 4 hours (typical match duration)
+    const isLive = diff <= 0 && diff > -4*60*60*1000;
+    // Match is upcoming if not started yet
+    const isUpcoming = diff > 0;
+    // Match ended if more than 4 hours passed
+    const isEnded = diff <= -4*60*60*1000;
+    
+    // Get category name or league
+    const cat=DATA.categories?.find(c=>c.id===m.category_id);
+    const leagueName=m.league||cat?.name||'Sports';
+    const leagueLogo=m.league_logo||'';
+    
+    let content = '';
+    
+    // Common header with league
+    const leagueHeader = `
+        <div class="league-badge">
+            ${leagueLogo?`<img src="${leagueLogo}" referrerpolicy="no-referrer" style="width:24px;height:24px" onerror="this.style.display='none'">`:''}
+            <span>${esc(leagueName)}</span>
+        </div>
+    `;
+    
+    // Common teams display
+    const teamsDisplay = `
+        <div class="teams-display">
+            <div class="team-card">
+                <img class="team-logo" src="${m.logo1||'/icon-192.png'}" referrerpolicy="no-referrer" onerror="this.src='/icon-192.png'">
+                <div class="team-name">${esc(m.team1)}</div>
+            </div>
+            
+            <div class="countdown-badge" style="${isLive?'background:rgba(248,81,73,0.15);border-color:#f85149;color:#f85149':isEnded?'background:var(--card);border-color:var(--bdr);color:var(--mut)':''}">
+                ${isLive?'🔴 LIVE':isEnded?'Ended':getCountdown(diff)}
+            </div>
+            
+            <div class="team-card">
+                <img class="team-logo" src="${m.logo2||'/icon-192.png'}" referrerpolicy="no-referrer" onerror="this.src='/icon-192.png'">
+                <div class="team-name">${esc(m.team2)}</div>
+            </div>
+        </div>
+    `;
+    
+    if(isLive && m.stream_url){
+        // LIVE with stream - show Watch button
+        content = `
+            ${leagueHeader}
+            ${teamsDisplay}
+            <button onclick="watchMatch(${m.id})" class="btn-watch-live">
+                ▶ Watch Live Stream
+            </button>
+        `;
+    } else if(isUpcoming){
+        // UPCOMING - Show countdown with datetime
+        content = `
+            ${leagueHeader}
+            ${teamsDisplay}
+            <div class="match-datetime">
+                ${dt.toLocaleDateString('en-US',{day:'numeric',month:'long'})}, <strong>${dt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</strong>
+            </div>
+        `;
+    } else {
+        // ENDED
+        content = `
+            ${leagueHeader}
+            ${teamsDisplay}
+        `;
+    }
+    
+    document.getElementById('featured-match').innerHTML = content;
+}
+
+// Helper function for countdown
+function getCountdown(diff){
+    const days=Math.floor(diff/(1000*60*60*24));
+    const hours=Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+    const mins=Math.floor((diff%(1000*60*60))/(1000*60));
+    
+    if(days>0) return `${days}d ${hours}h`;
+    if(hours>0) return `${hours}h ${mins}m`;
+    if(mins>0) return `${mins} min`;
+    return 'Starting soon';
+}
+
+function watchMatch(id){
+    const m=MATCHES.find(x=>x.id===id);
+    if(m&&m.stream_url){
+        // Check if logged in first
+        if(!localStorage.getItem('vt')){
+            alert('Please login to watch live streams');
+            window.location.href='/login';
+            return;
+        }
+        
+        // Check subscription - DATA.require_subscription comes directly from API
+        if(DATA.require_subscription && !hasSubscription()){
+            showPaymentModal(m.team1+' vs '+m.team2);
+            return;
+        }
+        playMatchStream(m);
+    }else{
+        alert('Stream not available yet');
+    }
+}
+
+function playMatchStream(m){
+    const url = m.stream_url;
+    const title = m.team1 + ' vs ' + m.team2;
+    
+    // Add playing class
+    document.getElementById('featured-content').classList.add('playing');
+    document.querySelector('.main').classList.add('playing-mode');
+    
+    // Build player HTML
+    let playerHtml = `
+        <div class="video-player-wrap">
+            <div class="video-header">
+                <div class="video-title">
+                    <button class="back-btn" onclick="showMatches()">← Back</button>
+                    <span class="live-badge">LIVE</span>
+                    <span class="video-name">${esc(title)}</span>
+                </div>
+                <div class="video-controls">
+                    <button class="srv-btn" onclick="goFullscreen()">⛶ Fullscreen</button>
+                </div>
+            </div>
+            <div class="video-container" id="video-container">
+    `;
+    
+    // Check if iframe or direct stream
+    if(url.includes('iframe') || url.includes('embed') || url.includes('player')){
+        playerHtml += `<iframe src="${url}" allowfullscreen allow="autoplay; encrypted-media; fullscreen"></iframe>`;
+    }else{
+        playerHtml += `<video id="main-video" controls autoplay playsinline></video>`;
+    }
+    
+    playerHtml += `
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('featured-match').innerHTML = playerHtml;
+    
+    // If direct video URL, play it
+    if(!url.includes('iframe') && !url.includes('embed') && !url.includes('player')){
+        setTimeout(()=>{
+            const video = document.getElementById('main-video');
+            if(video){
+                if(url.includes('.m3u8')){
+                    if(Hls.isSupported()){
+                        if(hls){hls.destroy();}
+                        hls = new Hls();
+                        hls.loadSource(url);
+                        hls.attachMedia(video);
+                        hls.on(Hls.Events.MANIFEST_PARSED, ()=>{
+                            video.play().catch(e=>{});
+                        });
+                    }else if(video.canPlayType('application/vnd.apple.mpegurl')){
+                        video.src = url;
+                        video.play().catch(e=>{});
+                    }
+                }else{
+                    video.src = url;
+                    video.play().catch(e=>{});
+                }
+            }
+        }, 100);
+    }
+}
+
+let currentChannel=null;
+let hls=null;
+let pendingChannelId=null;
+
+function hasSubscription(){
+    const vsub=localStorage.getItem('vsub');
+    if(!vsub)return false;
+    try{
+        const sub=JSON.parse(vsub);
+        return sub && new Date(sub.expires)>new Date();
+    }catch(e){return false;}
+}
+
+function showPaymentModal(channelName){
+    document.getElementById('modal-channel-name').textContent=channelName||'Channel';
+    loadPlans();
+    document.getElementById('paymentModal').classList.add('active');
+}
+
+function closePaymentModal(){
+    document.getElementById('paymentModal').classList.remove('active');
+    pendingChannelId=null;
+}
+
+async function loadPlans(){
+    try{
+        const r=await fetch('/api/plans');
+        const data=await r.json();
+        console.log('Plans data:', data);
+        
+        const plans=data.plans||[];
+        const list=document.getElementById('plans-list');
+        
+        if(plans.length===0){
+            list.innerHTML='<p style="color:var(--mut);text-align:center">No plans available</p>';
+            return;
+        }
+        
+        list.innerHTML=plans.map(p=>{
+            const isFeatured=p.featured;
+            const hasDiscount=p.original_price && p.original_price>p.price;
+            const discount=hasDiscount?Math.round((1-p.price/p.original_price)*100):0;
+            
+            return `
+            <div class="plan-item ${isFeatured?'featured':''}" onclick="selectPlan(${p.id})">
+                <div class="plan-info">
+                    <h3>${esc(p.name)} <span>${p.days} days</span></h3>
+                    <p>${p.devices||1} Device${(p.devices||1)>1?'s':''}</p>
+                </div>
+                <div class="plan-price">
+                    ${hasDiscount?`<div class="old">$${p.original_price}</div>`:''}
+                    <div class="current">$${Math.floor(p.price)}<sup>.${String(p.price).split('.')[1]||'99'}</sup></div>
+                    ${discount>0?`<div class="discount">${discount}% OFF</div>`:''}
+                </div>
+            </div>
+            `;
+        }).join('');
+    }catch(e){
+        console.error('Load plans error:', e);
+        document.getElementById('plans-list').innerHTML='<p style="color:#f85149">Error loading plans</p>';
+    }
+}
+
+function selectPlan(planId){
+    // Check if logged in
+    if(!localStorage.getItem('vt')){
+        alert('Please login first');
+        window.location.href='/login';
+        return;
+    }
+    // Go to payment page
+    window.location.href='/payment?plan='+planId;
+}
+
+function playChannel(id){
+    const channel=DATA.channels.find(c=>c.id===id);
+    if(!channel)return;
+    
+    // Check if logged in first
+    if(!localStorage.getItem('vt')){
+        alert('Please login to watch channels');
+        window.location.href='/login';
+        return;
+    }
+    
+    // Check subscription if required - DATA.require_subscription comes directly from API
+    if(DATA.require_subscription && !hasSubscription()){
+        pendingChannelId=id;
+        showPaymentModal(channel.name);
+        return;
+    }
+    
+    startPlayingChannel(channel);
+}
+
+function startPlayingChannel(channel){
+    currentChannel=channel;
+    const servers=channel.servers||[channel.iframe];
+    
+    // Build server buttons
+    const serverBtns=servers.map((s,i)=>
+        `<button class="srv-btn ${i===0?'active':''}" onclick="switchServer(${i})">Server ${i+1}</button>`
+    ).join('');
+    
+    // Add playing class to content
+    document.getElementById('featured-content').classList.add('playing');
+    document.querySelector('.main').classList.add('playing-mode');
+    
+    document.getElementById('featured-match').innerHTML=`
+        <div class="video-player-wrap">
+            <div class="video-header">
+                <div class="video-title">
+                    <div class="back-btn" onclick="showMatches()">← Back</div>
+                    <span class="live-badge">LIVE</span>
+                    <span class="video-name">${esc(channel.name)}</span>
+                </div>
+                <div class="video-controls">
+                    ${serverBtns}
+                    <button class="srv-btn" onclick="goFullscreen()">⛶ Fullscreen</button>
+                </div>
+            </div>
+            <div class="video-container" id="video-container"></div>
+        </div>
+    `;
+    
+    // Play first server
+    playStream(servers[0]);
+    
+    // Highlight in sidebar
+    document.querySelectorAll('.event-item').forEach(el=>el.classList.remove('active'));
+}
+
+function playStream(url){
+    const container=document.getElementById('video-container');
+    if(!url){
+        container.innerHTML='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--mut)">No stream available</div>';
+        return;
+    }
+    
+    // Check if iframe or direct stream
+    if(url.includes('iframe')||url.includes('embed')||url.includes('.html')||(!url.includes('.m3u8')&&!url.includes('.mp4')&&!url.includes('.ts')&&url.includes('http'))){
+        container.innerHTML=`<iframe src="${url}" allowfullscreen allow="autoplay; fullscreen; encrypted-media"></iframe>`;
+    }else{
+        container.innerHTML=`<video id="video" controls autoplay playsinline style="background:#000"></video>`;
+        const video=document.getElementById('video');
+        
+        if(url.includes('.m3u8')){
+            if(typeof Hls!=='undefined'&&Hls.isSupported()){
+                if(hls)hls.destroy();
+                hls=new Hls({enableWorker:true,lowLatencyMode:true});
+                hls.loadSource(url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(e=>{}));
+            }else if(video.canPlayType('application/vnd.apple.mpegurl')){
+                video.src=url;
+                video.play().catch(e=>{});
+            }
+        }else{
+            video.src=url;
+            video.play().catch(e=>{});
+        }
+    }
+}
+
+function switchServer(idx){
+    if(!currentChannel)return;
+    const servers=currentChannel.servers||[currentChannel.iframe];
+    
+    // Update buttons
+    document.querySelectorAll('.video-controls .srv-btn').forEach((btn,i)=>{
+        if(i<servers.length)btn.classList.toggle('active',i===idx);
+    });
+    
+    playStream(servers[idx]);
+}
+
+function goFullscreen(){
+    const container=document.getElementById('video-container');
+    const el=container.querySelector('video')||container.querySelector('iframe');
+    if(el){
+        if(el.requestFullscreen)el.requestFullscreen();
+        else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen();
+        else if(el.webkitEnterFullscreen)el.webkitEnterFullscreen();
+    }
+}
+
+function showMatches(){
+    currentChannel=null;
+    if(hls){hls.destroy();hls=null;}
+    
+    // Remove playing class
+    document.getElementById('featured-content').classList.remove('playing');
+    document.querySelector('.main').classList.remove('playing-mode');
+    
+    // Clear selected match and show default message
+    selectedMatch=null;
+    document.getElementById('featured-match').innerHTML='<p style="color:var(--mut)">Select a match or channel</p>';
+    renderSidebar();
+}
+
+function selectSport(catId,el){
+    currentCatId=catId;
+    document.querySelectorAll('.sport-tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    
+    // Clear selection and render sidebar
+    selectedMatch=null;
+    document.getElementById('featured-match').innerHTML='<p style="color:var(--mut)">Select a match or channel</p>';
+    renderSidebar();
+}
+
+function esc(s){return String(s||'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'})[c]);}
+
+loadData();
+
+// Auto-refresh matches every minute
+setInterval(()=>{
+    loadData();
+},60000);
+</script>
+</body></html>
